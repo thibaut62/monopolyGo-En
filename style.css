@@ -49,6 +49,25 @@ body.dark-mode header h1 {
     color: #4da3ff;
 }
 
+.header-controls {
+    display: flex;
+    align-items: center;
+}
+
+.album-selector {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    background-color: white;
+    margin-right: 10px;
+}
+
+body.dark-mode .album-selector {
+    background-color: #333;
+    color: #f0f0f0;
+    border-color: #555;
+}
+
 .controls {
     display: flex;
     justify-content: space-between;
@@ -308,6 +327,7 @@ body.dark-mode .card input[type="number"] {
     transition: background-color 0.3s ease;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 5px;
 }
 
@@ -330,7 +350,7 @@ body.dark-mode .btn-outline {
     border-color: #4da3ff;
 }
 
-.btn-outline:hover {
+body.dark-mode .btn-outline:hover {
     background-color: rgba(77, 163, 255, 0.1);
 }
 
@@ -355,14 +375,13 @@ body.dark-mode .theme-toggle {
 }
 
 .qr-container {
-    display: none;
+    display: flex;
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.7);
-    display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
@@ -374,6 +393,8 @@ body.dark-mode .theme-toggle {
     border-radius: 8px;
     text-align: center;
     max-width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
     position: relative;
 }
 
@@ -389,24 +410,225 @@ body.dark-mode .qr-modal {
     border: none;
     font-size: 20px;
     cursor: pointer;
+    color: #333;
+}
+
+body.dark-mode .qr-close {
+    color: #f0f0f0;
 }
 
 .qr-code {
     margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-.qr-link {
-    word-break: break-all;
+.qr-generating {
+    padding: 20px;
+    text-align: center;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+}
+
+body.dark-mode .qr-generating {
+    background-color: #333;
+}
+
+.share-options {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 15px 0;
+}
+
+.qr-note {
+    font-size: 14px;
+    color: #666;
     margin-top: 10px;
 }
 
-@media (max-width: 600px) {
+body.dark-mode .qr-note {
+    color: #aaa;
+}
+
+footer {
+    margin-top: 30px;
+    text-align: center;
+    font-size: 14px;
+    color: #777;
+    border-top: 1px solid #ddd;
+    padding-top: 20px;
+}
+
+body.dark-mode footer {
+    color: #aaa;
+    border-top-color: #444;
+}
+
+/* Styles pour les statistiques détaillées */
+.stats-modal {
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.detailed-stats {
+    text-align: left;
+}
+
+.stats-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-box {
+    flex: 1;
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+body.dark-mode .stat-box {
+    background-color: #2a2a2a;
+}
+
+.stat-box h4 {
+    margin-top: 0;
+    color: #666;
+}
+
+body.dark-mode .stat-box h4 {
+    color: #ccc;
+}
+
+.stat-progress {
+    height: 8px;
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    margin: 10px 0;
+    overflow: hidden;
+}
+
+body.dark-mode .stat-progress {
+    background-color: #444;
+}
+
+.stat-progress-bar {
+    height: 100%;
+    background-color: #007bff;
+    border-radius: 4px;
+}
+
+.set-stat {
+    margin-bottom: 10px;
+}
+
+.set-stat-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.set-stat-progress {
+    height: 6px;
+    background-color: #e0e0e0;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+body.dark-mode .set-stat-progress {
+    background-color: #444;
+}
+
+.set-stat-progress-bar {
+    height: 100%;
+    background-color: #007bff;
+    border-radius: 3px;
+}
+
+.set-stat-progress-bar.complete {
+    background-color: #4CAF50;
+}
+
+/* Import/Export styles */
+.import-options, .export-options {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.import-option {
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+body.dark-mode .import-option {
+    border-color: #555;
+}
+
+#importDataText {
+    width: 100%;
+    min-height: 100px;
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+body.dark-mode #importDataText {
+    background-color: #333;
+    color: #f0f0f0;
+    border-color: #555;
+}
+
+/* Adaptations pour les appareils mobiles */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    
+    .container {
+        padding: 15px;
+    }
+    
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .header-controls {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+        margin-top: 10px;
+    }
+    
     .controls {
         flex-direction: column;
     }
     
+    .search-box {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
     .filter-options {
-        margin-top: 10px;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .filter-btn {
+        flex: 1;
+        margin: 0 5px;
+        padding: 8px 5px;
+        font-size: 0.9em;
+        text-align: center;
     }
     
     .buttons {
@@ -415,6 +637,82 @@ body.dark-mode .qr-modal {
     
     .btn {
         width: 100%;
+        margin-bottom: 10px;
         justify-content: center;
+    }
+    
+    .stats-container {
+        flex-wrap: wrap;
+    }
+    
+    .stat-item {
+        flex-basis: 45%;
+        margin-bottom: 10px;
+    }
+    
+    .card {
+        flex-wrap: wrap;
+    }
+    
+    .card label {
+        width: 70%;
+    }
+    
+    .card input[type="number"] {
+        width: 50px;
+    }
+    
+    /* Ajustements pour modals sur mobile */
+    .qr-modal {
+        max-width: 95%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .export-options, .import-options {
+        flex-direction: column;
+    }
+    
+    .import-option {
+        margin-bottom: 15px;
+    }
+    
+    /* Style spécifique pour les notifications sur mobile */
+    .notification {
+        width: 90%;
+        padding: 10px;
+    }
+    
+    .notification-content {
+        flex-wrap: wrap;
+    }
+    
+    .stats-row {
+        flex-direction: column;
+    }
+    
+    .stat-box {
+        margin-bottom: 10px;
+    }
+    
+    /* Amélioration pour scroll horizontal sur les sets longs */
+    .set {
+        overflow-x: auto;
+    }
+}
+
+/* Classe utilitaire pour masquer des éléments sur mobile */
+@media (max-width: 480px) {
+    .hide-on-mobile {
+        display: none !important;
+    }
+    
+    /* Réduire la taille de la police sur très petits écrans */
+    body {
+        font-size: 14px;
+    }
+    
+    .set h2 {
+        font-size: 1.2em;
     }
 }
