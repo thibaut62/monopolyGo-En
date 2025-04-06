@@ -811,87 +811,137 @@ function importData() {
 }
 
 // Fonction pour traiter les données importées
+// Fonction pour traiter les données importées
 function processImportedData(dataString) {
-    const importedData = JSON.parse(dataString);
-    
-    // Détecter le format des données
-    if (importedData.version === "2.0") {
-        // Format v2.0
-        if (importedData.type === "full_export") {
-            // Importation complète
-            const allData = importedData.data;
-            
-            Object.keys(allData).forEach(albumName => {
+    try {
+        // D'abord, essayons de l'analyser comme JSON
+        const importedData = JSON.parse(dataString);
+        console.log("Données importées:", importedData); // Afficher les données pour le débogage
+        
+        // Détecter le format des données
+        if (importedData.version === "2.0") {
+            // Format v2.0
+            if (importedData.type === "full_export") {
+                // Importation complète
+                const allData = importedData.data;
+                
+                Object.keys(allData).forEach(albumName => {
+                    if (monopolyConfig.albums[albumName]) {
+                        localStorage.setItem(`monopolyGoData_${albumName}`, JSON.stringify(allData[albumName]));
+                    }
+                });
+                
+                // Recharger l'album actuel
+                loadCurrentAlbum();
+                showNotification('Tous les albums ont été importés avec succès !');
+            } else if (importedData.albumName) {
+                // Importation d'un seul album
+                const albumName = importedData.albumName;
+                const albumData = importedData.data;
+                
                 if (monopolyConfig.albums[albumName]) {
-                    localStorage.setItem(`monopolyGoData_${albumName}`, JSON.stringify(allData[albumName]));
+                    localStorage.setItem(`monopolyGoData_${albumName}`, JSON.stringify(albumData));
+                    
+                    // Si c'est l'album actuel, le recharger
+                    if (currentAlbum === albumName) {
+                        loadCurrentAlbum();
+                    }
+                    
+                    showNotification(`L'album "${albumName}" a été importé avec succès !`);
+                } else {
+                    showNotification(`Attention: L'album "${albumName}" n'existe pas dans cette version. Données importées dans l'album actuel.`, 'warning');
+                    // Importation dans l'album actuel
+                    importIntoCurrentAlbum(albumData);
+                }
+            } else {
+                // Structure inconnue mais format v2.0
+                showNotification('Format de données reconnu mais structure inhabituelle. Tentative d\'import dans l\'album actuel.', 'warning');
+                importIntoCurrentAlbum(importedData.data || importedData);
+            }
+        } else {
+            // Format ancien ou inconnu - essayer de l'importer directement
+            importIntoCurrentAlbum(importedData);
+        }
+    } catch (error) {
+        console.error("Erreur lors du traitement des données importées:", error);
+        showNotification('Erreur lors de l\'importation: ' + error.message, 'error');
+    }
+}
+
+// Fonction pour importer des données dans l'album actuel
+function importIntoCurrentAlbum(data) {
+    console.log("Importation dans l'album actuel:", data);
+    
+    // Réinitialiser toutes les cartes
+    document.querySelectorAll('.card-checkbox').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    
+    document.querySelectorAll('.card-count').forEach(counter => {
+        counter.value = 0;
+    });
+    
+    // Tenter différentes structures de données possibles
+    const setNames = getSetNames();
+    let importSuccess = false;
+    
+    // Cas 1: Structure directe {setName: [cards]}
+    if (typeof data === 'object' && !Array.isArray(data)) {
+        setNames.forEach((setName, setIndex) => {
+            if (data[setName]) {
+                const cards = data[setName];
+                processSetCards(setIndex, cards);
+                importSuccess = true;
+            }
+        });
+    }
+    
+    // Mise à jour de l'interface si l'importation a réussi
+    if (importSuccess) {
+        updateSetCompletion();
+        updateStats();
+        saveToLocalStorage();
+        showNotification('Collection importée avec succès dans l\'album actuel !');
+    } else {
+        showNotification('Aucune donnée compatible trouvée dans le fichier importé.', 'error');
+    }
+}
+
+// Fonction pour traiter les cartes d'un set
+function processSetCards(setIndex, cards) {
+    const cardElements = document.querySelectorAll(`.set[data-set-index="${setIndex}"] .card`);
+    
+    if (Array.isArray(cards)) {
+        if (typeof cards[0] === 'string') {
+            // Format simplifié (juste la liste des noms de cartes)
+            cardElements.forEach(cardElement => {
+                const checkbox = cardElement.querySelector('.card-checkbox');
+                const cardName = checkbox.dataset.cardName;
+                
+                if (cards.includes(cardName)) {
+                    checkbox.checked = true;
+                    cardElement.querySelector('.card-count').value = 1;
                 }
             });
-            
-            // Recharger l'album actuel
-            loadCurrentAlbum();
-            showNotification('Tous les albums ont été importés avec succès !');
         } else {
-            // Importation d'un seul album
-            const albumName = importedData.albumName;
-            const albumData = importedData.data;
-            
-            if (monopolyConfig.albums[albumName]) {
-                localStorage.setItem(`monopolyGoData_${albumName}`, JSON.stringify(albumData));
-                
-                // Si c'est l'album actuel, le recharger
-                if (currentAlbum === albumName) {
-                    loadCurrentAlbum();
+            // Format complet (objets avec checked et count)
+            cardElements.forEach((cardElement, index) => {
+                if (cards[index]) {
+                    const checkbox = cardElement.querySelector('.card-checkbox');
+                    const numberInput = cardElement.querySelector('.card-count');
+                    
+                    if (cards[index].checked !== undefined) {
+                        checkbox.checked = cards[index].checked;
+                    }
+                    
+                    if (cards[index].count !== undefined) {
+                        numberInput.value = cards[index].count;
+                    }
                 }
-                
-                showNotification(`L'album "${albumName}" a été importé avec succès !`);
-            } else {
-                showNotification(`Attention: L'album "${albumName}" n'existe pas dans cette version. Données non importées.`, 'warning');
-            }
+            });
         }
-    } else {
-        // Format ancien ou inconnu - essayer de l'importer dans l'album actuel
-        // Réinitialiser toutes les cartes
-        document.querySelectorAll('.card-checkbox').forEach(checkbox => {
-            checkbox.checked = false;
-        });
-        
-        document.querySelectorAll('.card-count').forEach(counter => {
-            counter.value = 0;
-        });
-        
-        // Appliquer les données importées
-        const setNames = getSetNames();
-        
-        setNames.forEach((setName, setIndex) => {
-            if (importedData[setName]) {
-                const cards = importedData[setName];
-                const cardElements = document.querySelectorAll(`.set[data-set-index="${setIndex}"] .card`);
-                
-                if (Array.isArray(cards)) {
-                    // Format simplifié (juste la liste des noms de cartes)
-                    cardElements.forEach(cardElement => {
-                        const checkbox = cardElement.querySelector('.card-checkbox');
-                        const cardName = checkbox.dataset.cardName;
-                        
-                        if (cards.includes(cardName)) {
-                            checkbox.checked = true;
-                            cardElement.querySelector('.card-count').value = 1;
-                        }
-                    });
-                } else {
-                    // Format complet (objet avec checked et count)
-                    cardElements.forEach((cardElement, index) => {
-                        if (cards[index]) {
-                            const checkbox = cardElement.querySelector('.card-checkbox');
-                            const numberInput = cardElement.querySelector('.card-count');
-                            
-                            checkbox.checked = cards[index].checked;
-                            numberInput.value = cards[index].count;
-                        }
-                    });
-                }
-            }
-        });
+    }
+}
         
         updateSetCompletion();
         updateStats();
