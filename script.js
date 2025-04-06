@@ -625,7 +625,7 @@ function prepareExportAllData() {
             allData[albumName] = {};
         }
     });
-
+    
     // Ajouter des métadonnées pour aider à l'importation
     return {
         version: "2.0",
@@ -811,7 +811,6 @@ function importData() {
 }
 
 // Fonction pour traiter les données importées
-// Fonction pour traiter les données importées
 function processImportedData(dataString) {
     try {
         // D'abord, essayons de l'analyser comme JSON
@@ -863,8 +862,8 @@ function processImportedData(dataString) {
             importIntoCurrentAlbum(importedData);
         }
     } catch (error) {
-        console.error("Erreur lors du traitement des données importées:", error);
-        showNotification('Erreur lors de l\'importation: ' + error.message, 'error');
+            console.error("Erreur lors du traitement des données importées:", error);
+            showNotification('Erreur lors de l\'importation: ' + error.message, 'error');
     }
 }
 
@@ -940,14 +939,6 @@ function processSetCards(setIndex, cards) {
                 }
             });
         }
-    }
-}
-        
-        updateSetCompletion();
-        updateStats();
-        saveToLocalStorage();
-        
-        showNotification('Collection importée avec succès dans l\'album actuel !');
     }
 }
 
@@ -1113,7 +1104,11 @@ function exportToCsv() {
     
     // Créer un blob et télécharger le fichier
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    tryExportFile({ csvData: csvContent }, `monopoly_go_${currentAlbum.replace(/\s+/g, '_').toLowerCase()}.csv`);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `monopoly_go_${currentAlbum.replace(/\s+/g, '_').toLowerCase()}.csv`;
+    a.click();
     
     // Offrir une option de copie pour les mobiles
     const exportModal = document.createElement('div');
