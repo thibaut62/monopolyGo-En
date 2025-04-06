@@ -3,10 +3,9 @@
 <head>
     <title>Gestionnaire Monopoly GO</title>
     <meta charset="UTF-8">
-    <meta charset="UTF-8">  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <meta name="description" content="Gestionnaire de collection de cartes Monopoly GO - Suivez votre progression et partagez votre collection">
-    <!-- Charger le fichier de configuration en premier -->
     <script src="config.js"></script>
 </head>
 <body>
@@ -39,29 +38,28 @@
         
         <div class="buttons">
             <button id="exportButton" class="btn">
-                <span>Exporter JSON</span>
+                <span>Exporter</span>
             </button>
             <button id="importButton" class="btn">
-                <span>Importer JSON</span>
+                <span>Importer</span>
             </button>
             <button id="exportCsvButton" class="btn btn-outline" onclick="exportToCsv()">
                 <span>Exporter CSV</span>
             </button>
             <button id="shareButton" class="btn btn-success">
-                <span>Partager QR Code</span>
+                <span>Partager</span>
             </button>
             <button id="statsButton" class="btn btn-outline" onclick="showDetailedStats()">
-                <span>Statistiques détaillées</span>
+                <span>Statistiques</span>
             </button>
         </div>
         
         <footer>
-            <p>Gestionnaire Monopoly GO - Version 2.0 - Avril 2025</p>
-            <p>Comment utiliser: Cochez les cartes que vous possédez et indiquez leur quantité. Vos données sont automatiquement sauvegardées.</p>
+            <p>Gestionnaire Monopoly GO - Version 2.0</p>
+            <p>Cochez les cartes que vous possédez et indiquez leur quantité. Vos données sont automatiquement sauvegardées.</p>
         </footer>
     </div>
     
-    <!-- Charger le script principal après le fichier de configuration -->
     <script src="script.js"></script>
 </body>
 </html>
