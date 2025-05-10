@@ -30,4 +30,8 @@ Aucune installation requise, l'application fonctionne directement dans le naviga
 
 Pour les développeurs :
 1. Clonez ce dépôt
+<<<<<<< HEAD
 2. Ouvrez index.html dans votre navigateur
+=======
+2. Ouvrez index.html dans votre navigateur
+>>>>>>> b4f2fd6a8855f180c47f2a385d14cd1e38d7de96
