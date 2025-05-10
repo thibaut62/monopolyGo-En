@@ -414,7 +414,6 @@
             thead.innerHTML = `
                 <th class="py-2 px-3 text-left">ID</th>
                 <th class="py-2 px-3 text-left">★</th>
-                <th class="py-2 px-3 text-left">Type</th>
                 <th class="py-2 px-3 text-left">Nom</th>
                 ${accounts.map(account => `<th class="py-2 px-3 text-center">${account}</th>`).join('')}
             `;
@@ -427,12 +426,6 @@
                 let html = `
                     <td class="py-2 px-3">${card.id}</td>
                     <td class="py-2 px-3">${'⭐'.repeat(card.stars)}</td>
-                    <td class="py-2 px-3">
-                        ${card.isGold ? 
-                            '<span class="inline-block bg-yellow-200 text-yellow-800 px-2 py-1 rounded text-xs font-bold">OR</span>' : 
-                            '<span class="inline-block bg-gray-200 text-gray-800 px-2 py-1 rounded text-xs">Standard</span>'
-                        }
-                    </td>
                     <td class="py-2 px-3">${card.name}</td>
                 `;
                 
@@ -478,7 +471,7 @@
             });
             
             // Mettre à jour les informations des cartes
-            document.getElementById('cardsInfo').textContent = `Total des cartes: ${cards.length} (dont ${cards.filter(c => c.isGold).length} cartes OR)`;
+            //document.getElementById('cardsInfo').textContent = `Total des cartes: ${cards.length} (dont ${cards.filter(c => c.isGold).length} cartes OR)`;
             
             // Ajouter les écouteurs d'événements aux inputs
             addQuantityInputListeners();
