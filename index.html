@@ -412,7 +412,6 @@
             // Mettre à jour l'en-tête du tableau pour afficher tous les comptes
             const thead = document.querySelector('thead tr');
             thead.innerHTML = `
-                <th class="py-2 px-3 text-left">ID</th>
                 <th class="py-2 px-3 text-left">★</th>
                 <th class="py-2 px-3 text-left">Nom</th>
                 ${accounts.map(account => `<th class="py-2 px-3 text-center">${account}</th>`).join('')}
@@ -424,7 +423,6 @@
                 
                 // Cellules de base
                 let html = `
-                    <td class="py-2 px-3">${card.id}</td>
                     <td class="py-2 px-3">${'⭐'.repeat(card.stars)}</td>
                     <td class="py-2 px-3">${card.name}</td>
                 `;
