@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-        <meta name="theme-color" content="#3b82f6"> <!-- Couleur thème pour les barres d'adresse mobiles -->
-        <title>Gestion Cartes Monopoly Star Wars</title>
+        <meta name="theme-color" content="#3b82f6"> <!-- Theme color for mobile address bars -->
+        <title>Star Wars Monopoly Cards Manager</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <script src="js/cardsData.js"></script>
         <style>
             .gold-card {
                 background-color: #fef3c7;
             }
-            /* Styles pour améliorer l'expérience mobile */
+            /* Styles for better mobile experience */
             @media (max-width: 640px) {
                 .quantity-input {
                     width: 2.5rem;
@@ -22,13 +22,13 @@
                 th, td {
                     padding: 0.5rem 0.25rem;
                 }
-                /* Ajuster la largeur du tableau pour mobile */
+                /* Adjust table width for mobile */
                 .table-container {
                     overflow-x: auto;
                     -webkit-overflow-scrolling: touch;
                 }
             }
-            /* Styles pour l'app installée */
+            /* Styles for installed app */
             @media (display-mode: standalone) {
                 body {
                     padding-top: env(safe-area-inset-top);
@@ -41,101 +41,119 @@
     </head>
     <body class="bg-gray-100 p-2 sm:p-4">
         <div class="max-w-7xl mx-auto">
-            <h1 class="text-xl sm:text-2xl font-bold text-center mb-3">Gestion Cartes Monopoly Star Wars</h1>
-            <div class="flex justify-center items-center mb-3 gap-2">
-                <span class="text-sm text-gray-600">Vous appréciez cette application ?</span>
-                <form action="https://www.paypal.com/donate" method="post" target="_blank">
-                    <input type="hidden" name="business" value="delville.thibaut@gmail.com" />
-                    <input type="hidden" name="no_recurring" value="0" />
-                    <input type="hidden" name="item_name" value="Soutien au développement de l'app Monopoly Star Wars" />
-                    <input type="hidden" name="currency_code" value="EUR" />
-                    <input type="image" src="https://www.paypalobjects.com/fr_FR/FR/i/btn/btn_donate_SM.gif" border="0" name="submit" title="PayPal - Un moyen sûr et facile de payer en ligne !" alt="Bouton Faire un don" />
-                    <img alt="" border="0" src="https://www.paypal.com/fr_FR/i/scr/pixel.gif" width="1" height="1" />
-                </form>
-            </div>
+            <h1 id="appTitle" class="text-xl sm:text-2xl font-bold text-center mb-3">Star Wars Monopoly Cards Manager</h1>
+            
             <div class="flex gap-2 justify-center mb-3">
-                <button id="saveButton" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm sm:text-base sm:px-4">Sauvegarder</button>
-                <button id="loadButton" class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded text-sm sm:text-base sm:px-4">Charger</button>
+                <button id="saveButton" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm sm:text-base sm:px-4">Save</button>
+                <button id="loadButton" class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded text-sm sm:text-base sm:px-4">Load</button>
             </div>
             
-            <!-- Section de configuration des comptes -->
+            <!-- Accounts configuration section -->
             <div class="bg-white p-3 rounded shadow mb-3">
-                <h2 class="text-lg sm:text-xl font-bold mb-2">Configuration des comptes</h2>
+                <h2 id="accountsTitle" class="text-lg sm:text-xl font-bold mb-2">Accounts Configuration</h2>
                 <div id="accountsList" class="mb-2">
-                    <!-- Les comptes seront affichés ici -->
+                    <!-- Accounts will be displayed here -->
                 </div>
                 <div class="flex gap-2">
-                    <input type="text" id="newAccountName" placeholder="Nom du nouveau compte" 
+                    <input type="text" id="newAccountName" placeholder="New account name" 
                            class="border rounded px-2 py-1 flex-grow text-sm sm:text-base">
                     <button id="addAccountBtn" class="bg-blue-500 text-white px-2 py-1 rounded text-sm whitespace-nowrap">
-                        Ajouter
+                        Add
                     </button>
                 </div>
             </div>
             
-            <!-- Boutons de copie/import par compte -->
+            <!-- Account copy/import buttons -->
             <div id="accountButtons" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mb-3">
-                <!-- Les boutons seront générés ici -->
+                <!-- Buttons will be generated here -->
             </div>
             
-            <!-- Statistiques -->
+            <!-- Statistics -->
             <div class="mb-3">
-                <h2 class="text-lg sm:text-xl font-bold mb-2">Statistiques</h2>
+                <h2 id="statisticsTitle" class="text-lg sm:text-xl font-bold mb-2">Statistics</h2>
                 <div id="statistics" class="bg-white p-3 rounded shadow">
-                    <!-- Les statistiques seront affichées ici -->
+                    <!-- Statistics will be displayed here -->
                 </div>
             </div>
             
-            <!-- Informations sur les cartes -->
+            <!-- Cards information -->
             <div class="mb-2">
                 <p id="cardsInfo" class="text-xs sm:text-sm text-gray-600"></p>
             </div>
             
-            <!-- Tableau des cartes - Ajout de la classe table-container -->
+            <!-- Cards table - Added table-container class -->
             <div class="bg-white rounded shadow table-container mb-4">
                 <table class="w-full">
                     <thead>
                         <tr class="bg-gray-100 border-b">
                             <th class="py-2 px-1 sm:px-3 text-left">ID</th>
                             <th class="py-2 px-1 sm:px-3 text-left">★</th>
-                            <th class="py-2 px-1 sm:px-3 text-left">Type</th>
-                            <th class="py-2 px-1 sm:px-3 text-left">Nom</th>
-                            <!-- Les en-têtes des comptes seront générés dynamiquement -->
+                            <th class="py-2 px-1 sm:px-3 text-left">Name</th>
+                            <!-- Account headers will be generated dynamically -->
                         </tr>
                     </thead>
                     <tbody id="cardsTable">
-                        <!-- Les cartes seront affichées ici -->
+                        <!-- Cards will be displayed here -->
                     </tbody>
                 </table>
             </div>
+            
+            <!-- PayPal donation section -->
+            <div class="mt-8 bg-white p-4 rounded shadow">
+                <div class="text-center">
+                    <h2 id="donationTitle" class="text-lg font-bold mb-2">Support this project</h2>
+                    <p id="donationText" class="text-gray-600 mb-4">If this application is useful to you, you can support its development with a donation. Thank you for your generosity!</p>
+                    
+                    <div class="flex justify-center mb-2">
+                        <a href="https://www.paypal.com/donate/?business=delville.thibaut%40gmail.com&no_recurring=0&item_name=Support+for+Star+Wars+Monopoly+Cards+Manager&currency_code=EUR" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        id="donateButton"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M19.5 5.25H4.5C3.25736 5.25 2.25 6.25736 2.25 7.5V16.5C2.25 17.7426 3.25736 18.75 4.5 18.75H19.5C20.7426 18.75 21.75 17.7426 21.75 16.5V7.5C21.75 6.25736 20.7426 5.25 19.5 5.25Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M15.75 15.75H18M15 12.75H18.75M11.25 18.75V5.25M6.75 9.75H8.25C9.49264 9.75 10.5 10.7574 10.5 12V12C10.5 13.2426 9.49264 14.25 8.25 14.25H6.75V9.75Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span>Donate with PayPal</span>
+                        </a>
+                    </div>
+                    
+                    <p id="developedWith" class="text-xs text-gray-500">Developed with ❤️ for the Star Wars community</p>
+                </div>
+            </div>
+            
+            <!-- Link to French version -->
+            <p class="text-center text-sm mt-2">
+                <a href="https://github.com/thibaut62/monopolyGo-Fr" target="_blank" class="text-blue-600 hover:underline">Version française disponible ici</a>
+            </p>
         </div>
     
     <script>
-        // Variables globales
+        // Global variables
         let cards = [];
         let accounts = [];
         
-        // Fonction pour initialiser le stockage avec des valeurs par défaut si nécessaire
+        // Function to initialize storage with default values if needed
         function initializeStorage() {
             if (!localStorage.getItem('monopolyAccounts')) {
-                // Configuration par défaut : 2 comptes
-                const defaultAccounts = ["Compte 1", "Compte 2"];
+                // Default configuration: 2 accounts
+                const defaultAccounts = ["Account 1", "Account 2"];
                 localStorage.setItem('monopolyAccounts', JSON.stringify(defaultAccounts));
             }
         }
 
-        // Fonction pour charger les comptes depuis le stockage local
+        // Function to load accounts from local storage
         function loadAccounts() {
             initializeStorage();
             return JSON.parse(localStorage.getItem('monopolyAccounts'));
         }
 
-        // Fonction pour sauvegarder les comptes dans le stockage local
+        // Function to save accounts to local storage
         function saveAccounts(accounts) {
             localStorage.setItem('monopolyAccounts', JSON.stringify(accounts));
         }
 
-        // Fonction pour ajouter un nouveau compte
+        // Function to add a new account
         function addAccount(name) {
             const accounts = loadAccounts();
             accounts.push(name);
@@ -143,30 +161,30 @@
             return accounts;
         }
 
-        // Fonction pour supprimer un compte
+        // Function to remove an account
         function removeAccount(index) {
             const accounts = loadAccounts();
-            // Vérifier qu'il reste au moins un compte
+            // Make sure there's at least one account left
             if (accounts.length <= 1) {
-                alert("Vous devez conserver au moins un compte.");
+                alert("You must keep at least one account.");
                 return accounts;
             }
             
-            // Supprimer le compte
+            // Remove the account
             accounts.splice(index, 1);
             
-            // Supprimer les quantités associées à ce compte
+            // Remove the associated quantities from cards
             cards = cards.map(card => {
                 const newQuantities = card.quantities.filter((_, i) => i !== index);
                 return { ...card, quantities: newQuantities };
             });
             
             saveAccounts(accounts);
-            saveData(); // Sauvegarder aussi les cartes modifiées
+            saveData(); // Also save the modified cards
             return accounts;
         }
 
-        // Fonction pour renommer un compte
+        // Function to rename an account
         function renameAccount(index, newName) {
             const accounts = loadAccounts();
             accounts[index] = newName;
@@ -174,94 +192,94 @@
             return accounts;
         }
 
-        // Fonction d'initialisation
+        // Initialization function
         function init() {
-            console.log("Initialisation de l'application...");
+            console.log("Initializing application...");
             
-            // Tenter de migrer les anciennes données s'il y en a
+            // Try to migrate old data if any
             migrateOldData();
             
-            // Charger les comptes
+            // Load accounts
             accounts = loadAccounts();
             
-            // Charger les données sauvegardées ou initialiser
+            // Load saved data or initialize
             const savedData = localStorage.getItem('monopolyData');
             if (savedData) {
                 try {
                     const data = JSON.parse(savedData);
                     cards = data.cards;
                     
-                    // Vérifier si le nombre de comptes a changé
+                    // Check if the number of accounts has changed
                     if (cards.length > 0 && cards[0].quantities.length !== accounts.length) {
-                        // Adapter les quantités au nouveau nombre de comptes
+                        // Adapt quantities to the new number of accounts
                         adjustQuantities();
                     }
                     
-                    console.log("Données chargées depuis le stockage local:", cards.length, "cartes");
+                    console.log("Data loaded from local storage:", cards.length, "cards");
                 } catch (e) {
-                    console.error("Erreur lors du chargement des données:", e);
+                    console.error("Error loading data:", e);
                     initializeDefaultData();
                 }
             } else {
-                console.log("Aucune donnée sauvegardée, initialisation par défaut...");
+                console.log("No saved data, initializing defaults...");
                 initializeDefaultData();
             }
 
-            // Afficher les comptes
+            // Display accounts
             renderAccounts();
             
-            // Initialiser les boutons des comptes
+            // Initialize account buttons
             renderAccountButtons();
             
-            // Afficher les cartes
+            // Display cards
             renderCards();
             
-            // Mettre à jour les statistiques
+            // Update statistics
             updateStatistics();
             
-            // Ajouter la légende pour les échanges
+            // Add legend for exchanges
             renderLegend();
             
-            // Ajouter les écouteurs d'événements
+            // Add event listeners
             addEventListeners();
         }
 
-        // Fonction pour migrer les anciennes données (thib gros/petit) vers le nouveau format
+        // Function to migrate old data (thib gros/petit) to new format
         function migrateOldData() {
-            // Vérifier si nous avons déjà des comptes configurés
+            // Check if we already have configured accounts
             if (localStorage.getItem('monopolyAccounts')) {
-                return; // Déjà migré
+                return; // Already migrated
             }
             
-            // Vérifier s'il y a d'anciennes données à migrer
+            // Check if there's old data to migrate
             const savedData = localStorage.getItem('monopolyData');
             if (savedData) {
                 try {
                     const data = JSON.parse(savedData);
                     
-                    // Si les données ont l'ancien format avec "thib gros" et "thib petit"
+                    // If the data has the old format with "thib gros" and "thib petit"
                     if (data.cards && data.cards.length > 0 && data.cards[0].quantities && data.cards[0].quantities.length === 2) {
-                        // Créer les comptes avec les anciens noms
+                        // Create accounts with old names
                         localStorage.setItem('monopolyAccounts', JSON.stringify(["thib gros", "thib petit"]));
-                        console.log("Migration réussie des anciens comptes");
+                        console.log("Successful migration of old accounts");
                     }
                 } catch (e) {
-                    console.error("Erreur lors de la migration:", e);
+                    console.error("Error during migration:", e);
                 }
             }
         }
 
-        // Fonction pour ajuster les quantités si le nombre de comptes change
+        // Function to adjust quantities if the number of accounts changes
         function adjustQuantities() {
             cards = cards.map(card => {
                 let newQuantities = [...card.quantities];
                 
-                // Si le nombre de comptes a augmenté, ajouter des zéros
+                // If the number of accounts has increased, add zeros
                 while (newQuantities.length < accounts.length) {
                     newQuantities.push(0);
                 }
                 
-                // Si le nombre de comptes a diminué, tronquer
+                // If the number of accounts has decreased, truncate
                 if (newQuantities.length > accounts.length) {
                     newQuantities = newQuantities.slice(0, accounts.length);
                 }
@@ -270,16 +288,16 @@
             });
         }
 
-        // Fonction pour initialiser les données par défaut
+        // Function to initialize default data
         function initializeDefaultData() {
             cards = cardsData.map(card => {
-                // Créer un tableau de quantités avec un zéro par compte
+                // Create a quantities array with one zero per account
                 const quantities = new Array(accounts.length).fill(0);
                 return { ...card, quantities };
             });
         }
 
-        // Fonction pour rendre la liste des comptes
+        // Function to render the accounts list
         function renderAccounts() {
             const container = document.getElementById('accountsList');
             container.innerHTML = '';
@@ -292,22 +310,22 @@
                     <div class="flex gap-2">
                         <button class="rename-account-btn bg-yellow-500 text-white px-2 py-1 rounded text-xs" 
                                 data-index="${index}">
-                            Renommer
+                            Rename
                         </button>
                         <button class="remove-account-btn bg-red-500 text-white px-2 py-1 rounded text-xs" 
                                 data-index="${index}">
-                            Supprimer
+                            Delete
                         </button>
                     </div>
                 `;
                 container.appendChild(accountDiv);
             });
             
-            // Ajouter les écouteurs d'événements pour les boutons
+            // Add event listeners to the buttons
             document.querySelectorAll('.rename-account-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const index = parseInt(this.getAttribute('data-index'));
-                    const newName = prompt('Nouveau nom pour le compte:', accounts[index]);
+                    const newName = prompt('New name for the account:', accounts[index]);
                     if (newName && newName.trim() !== '') {
                         accounts = renameAccount(index, newName.trim());
                         renderAccounts();
@@ -321,7 +339,7 @@
             document.querySelectorAll('.remove-account-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const index = parseInt(this.getAttribute('data-index'));
-                    if (confirm(`Êtes-vous sûr de vouloir supprimer le compte "${accounts[index]}" ?`)) {
+                    if (confirm(`Are you sure you want to delete the account "${accounts[index]}"?`)) {
                         accounts = removeAccount(index);
                         renderAccounts();
                         renderAccountButtons();
@@ -332,7 +350,7 @@
             });
         }
 
-        // Fonction pour rendre les boutons des comptes
+        // Function to render account buttons
         function renderAccountButtons() {
             const container = document.getElementById('accountButtons');
             container.innerHTML = '';
@@ -344,15 +362,15 @@
                     <div class="text-sm font-medium mb-1">${account}</div>
                     <div class="flex gap-2">
                         <button class="copy-btn bg-blue-500 text-white px-2 py-1 rounded text-xs" 
-                                data-account-index="${index}">Copier</button>
+                                data-account-index="${index}">Copy</button>
                         <button class="import-btn bg-green-500 text-white px-2 py-1 rounded text-xs" 
-                                data-account-index="${index}">Importer</button>
+                                data-account-index="${index}">Import</button>
                     </div>
                 `;
                 container.appendChild(div);
             });
             
-            // Ajouter les écouteurs d'événements
+            // Add event listeners
             document.querySelectorAll('.copy-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const accountIndex = parseInt(this.getAttribute('data-account-index'));
@@ -368,7 +386,7 @@
             });
         }
 
-        // Fonction pour copier les quantités d'un compte
+        // Function to copy quantities from an account
         function copyAccount(accountIndex) {
             const quantitiesText = cards
                 .filter(card => card.quantities[accountIndex] > 0)
@@ -377,17 +395,17 @@
             
             navigator.clipboard.writeText(quantitiesText)
                 .then(() => {
-                    alert(`Données de ${accounts[accountIndex]} copiées dans le presse-papier.`);
+                    alert(`${accounts[accountIndex]} data copied to clipboard.`);
                 })
                 .catch(err => {
-                    console.error('Erreur lors de la copie:', err);
-                    alert('Erreur lors de la copie des données.');
+                    console.error('Error copying:', err);
+                    alert("Error copying data.");
                 });
         }
 
-        // Fonction pour importer les quantités d'un compte
+        // Function to import quantities for an account
         function importAccount(accountIndex) {
-            const input = prompt(`Collez les données à importer pour ${accounts[accountIndex]}`);
+            const input = prompt(`Paste the data to import for ${accounts[accountIndex]}`);
             if (!input) return;
             
             try {
@@ -402,28 +420,29 @@
                     }
                 });
                 
-                alert(`Données importées pour ${accounts[accountIndex]}.`);
+                alert(`Data imported for ${accounts[accountIndex]}.`);
                 renderCards();
                 updateStatistics();
                 
             } catch (e) {
-                console.error('Erreur lors de l\'importation:', e);
-                alert('Format des données invalide. Veuillez vérifier et réessayer.');
+                console.error('Error importing:', e);
+                alert("Invalid data format. Please check and try again.");
             }
         }
 
-        // Mise à jour de l'affichage des cartes pour prendre en compte un nombre variable de comptes
+        // Updated function to render cards for a variable number of accounts
         function renderCards() {
-            console.log("Rendu des cartes...", cards.length, "cartes à afficher");
+            console.log("Rendering cards...", cards.length, "cards to display");
             
             const tbody = document.getElementById('cardsTable');
             tbody.innerHTML = '';
             
-            // Mettre à jour l'en-tête du tableau pour afficher tous les comptes
+            // Update table header to display all accounts
             const thead = document.querySelector('thead tr');
             thead.innerHTML = `
+                <th class="py-2 px-3 text-left">ID</th>
                 <th class="py-2 px-3 text-left">★</th>
-                <th class="py-2 px-3 text-left">Nom</th>
+                <th class="py-2 px-3 text-left">Name</th>
                 ${accounts.map(account => `<th class="py-2 px-3 text-center">${account}</th>`).join('')}
             `;
             
@@ -431,22 +450,23 @@
                 const tr = document.createElement('tr');
                 tr.className = `border-t hover:bg-gray-50 ${card.isGold ? 'gold-card' : ''}`;
                 
-                // Cellules de base
+                // Basic cells
                 let html = `
+                    <td class="py-2 px-3">${card.id}</td>
                     <td class="py-2 px-3">${'⭐'.repeat(card.stars)}</td>
                     <td class="py-2 px-3">${card.name}</td>
                 `;
                 
-                // Ajouter une cellule pour chaque compte
+                // Add a cell for each account
                 accounts.forEach((_, accountIndex) => {
-                    // Vérifier s'il peut y avoir des échanges
+                    // Check for exchange possibilities
                     let accountClass = '';
                     let exchangeIndicator = '';
                     
-                    // Détecter les possibilités d'échange
+                    // Detect exchange possibilities
                     const hasExtra = card.quantities[accountIndex] > 1;
                     
-                    // Vérifier si d'autres comptes ont besoin de cette carte
+                    // Check if other accounts need this card
                     const otherAccountsNeed = accounts.some((_, otherIndex) => 
                         otherIndex !== accountIndex && card.quantities[otherIndex] === 0
                     );
@@ -478,14 +498,14 @@
                 tbody.appendChild(tr);
             });
             
-            // Mettre à jour les informations des cartes
-            //document.getElementById('cardsInfo').textContent = `Total des cartes: ${cards.length} (dont ${cards.filter(c => c.isGold).length} cartes OR)`;
+            // Update card information
+            document.getElementById('cardsInfo').textContent = `Total cards: ${cards.length} (including ${cards.filter(c => c.isGold).length} GOLD cards)`;
             
-            // Ajouter les écouteurs d'événements aux inputs
+            // Add event listeners to inputs
             addQuantityInputListeners();
         }
 
-        // Fonction séparée pour ajouter les écouteurs aux inputs de quantité
+        // Separate function to add event listeners to quantity inputs
         function addQuantityInputListeners() {
             document.querySelectorAll('.quantity-input').forEach(input => {
                 input.addEventListener('change', function() {
@@ -498,7 +518,7 @@
             });
         }
 
-        // Fonction pour mettre à jour la quantité d'une carte
+        // Function to update a card's quantity
         function updateQuantity(cardId, accountIndex, newValue) {
             cards = cards.map(card => {
                 if (card.id === cardId) {
@@ -509,29 +529,29 @@
                 return card;
             });
             
-            // Mettre à jour les statistiques
+            // Update statistics
             updateStatistics();
             
-            // Rafraîchir l'affichage des cartes pour mettre à jour les indicateurs d'échange
+            // Refresh the display to update exchange indicators
             renderCards();
         }
 
-        // Modification de la fonction updateStatistics pour un nombre variable de comptes
+        // Updated function for a variable number of accounts
         function updateStatistics() {
             const container = document.getElementById('statistics');
             container.innerHTML = '';
             
-            // Créer un conteneur flex pour l'affichage horizontal
+            // Create a flex container for horizontal display
             const flexContainer = document.createElement('div');
             flexContainer.className = 'flex flex-wrap justify-center gap-4';
             container.appendChild(flexContainer);
             
-            // Calculer le nombre de cartes uniques possédées par compte
+            // Calculate the number of unique cards owned per account
             const uniqueCardsByAccount = accounts.map((_, index) => {
                 return cards.filter(card => card.quantities[index] > 0).length;
             });
             
-            // Afficher les statistiques pour chaque compte
+            // Display statistics for each account
             accounts.forEach((account, index) => {
                 const div = document.createElement('div');
                 div.className = 'text-center bg-white p-2 rounded shadow';
@@ -543,41 +563,41 @@
             });
         }
 
-        // Fonction pour ajouter une légende expliquant les indicateurs d'échange
+        // Function to add a legend explaining the exchange indicators
         function renderLegend() {
             const infoDiv = document.getElementById('cardsInfo');
             
-            // Créer un conteneur pour la légende
+            // Create a container for the legend
             const legendDiv = document.createElement('div');
             legendDiv.className = 'mt-2 text-sm flex flex-wrap gap-4 justify-center';
             
-            // Ajouter les explications des indicateurs
+            // Add indicator explanations
             legendDiv.innerHTML = `
                 <div class="flex items-center">
                     <span class="inline-block w-4 h-4 bg-green-100 border border-green-300 mr-1"></span>
-                    <span>Peut donner (doublons)</span>
+                    <span>Can give (duplicates)</span>
                 </div>
                 <div class="flex items-center">
                     <span class="inline-block w-4 h-4 bg-blue-100 border border-blue-300 mr-1"></span>
-                    <span>Besoin (manquante)</span>
+                    <span>Needs (missing)</span>
                 </div>
                 <div class="flex items-center">
                     <span class="inline-block mr-1 text-green-600">⟷</span>
-                    <span>Échange possible</span>
+                    <span>Exchange possible</span>
                 </div>
             `;
             
-            // Insérer la légende après les infos des cartes
+            // Insert the legend after the cards info
             infoDiv.parentNode.insertBefore(legendDiv, infoDiv.nextSibling);
         }
 
-        // Fonction pour ajouter tous les écouteurs d'événements
+        // Function to add all event listeners
         function addEventListeners() {
-            // Boutons existants
+            // Existing buttons
             document.getElementById('saveButton').addEventListener('click', saveData);
             document.getElementById('loadButton').addEventListener('click', loadData);
             
-            // Nouveaux boutons pour les comptes
+            // New account buttons
             document.getElementById('addAccountBtn').addEventListener('click', function() {
                 const input = document.getElementById('newAccountName');
                 const name = input.value.trim();
@@ -593,18 +613,18 @@
                 }
             });
             
-            // Écouteur pour la touche Enter dans le champ de texte
+            // Event listener for Enter key in text field
             document.getElementById('newAccountName').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     document.getElementById('addAccountBtn').click();
                 }
             });
             
-            // Ajouter les écouteurs pour les inputs de quantité
+            // Add event listeners to quantity inputs
             addQuantityInputListeners();
         }
 
-        // Fonction pour sauvegarder les données
+        // Function to save data
         function saveData() {
             const data = {
                 cards: cards,
@@ -612,10 +632,10 @@
             };
             
             localStorage.setItem('monopolyData', JSON.stringify(data));
-            alert('Données sauvegardées avec succès !');
+            alert("Data saved successfully!");
         }
 
-        // Fonction pour charger les données
+        // Function to load data
         function loadData() {
             const savedData = localStorage.getItem('monopolyData');
             if (savedData) {
@@ -623,24 +643,24 @@
                     const data = JSON.parse(savedData);
                     cards = data.cards;
                     
-                    // Vérifier si le nombre de comptes a changé depuis la sauvegarde
+                    // Check if the number of accounts has changed since saving
                     if (cards.length > 0 && cards[0].quantities.length !== accounts.length) {
                         adjustQuantities();
                     }
                     
                     renderCards();
                     updateStatistics();
-                    alert('Données chargées avec succès !');
+                    alert("Data loaded successfully!");
                 } catch (e) {
-                    console.error('Erreur lors du chargement des données:', e);
-                    alert('Erreur lors du chargement des données.');
+                    console.error('Error loading data:', e);
+                    alert("Error loading data.");
                 }
             } else {
-                alert('Aucune donnée sauvegardée trouvée.');
+                alert("No saved data found.");
             }
         }
 
-        // Initialisation au chargement de la page
+        // Initialize on page load
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>

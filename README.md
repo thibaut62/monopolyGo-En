@@ -1,37 +1,52 @@
-# Gestionnaire de Cartes Monopoly Star Wars
+# Star Wars Monopoly Cards Manager
 
-Une application web permettant de gérer et suivre une collection de cartes Monopoly Star Wars.
+A web application for managing and tracking a Star Wars Monopoly card collection.
 
-## Fonctionnalités
+## Features
 
-- Affichage de toutes les cartes de la collection (234 cartes)
-- Suivi des quantités pour deux comptes différents
-- Mise en évidence des cartes qui peuvent être échangées entre comptes
-- Sauvegarde locale des données dans le navigateur
-- Export/import des collections
+- Display of all cards in the collection (234 cards)
+- Track quantities across multiple accounts
+- Highlight cards that can be exchanged between accounts
+- Local storage of data in the browser
+- Export/import collections
 
-## Comment utiliser
+## How to Use
 
-1. Ouvrez l'application dans votre navigateur
-2. Utilisez les champs numériques pour ajuster les quantités de chaque carte
-3. Les cartes que vous pouvez échanger entre comptes sont mises en évidence
-4. Utilisez le bouton "Sauvegarder" pour conserver vos données
-5. Utilisez les boutons "Copier" et "Importer" pour partager vos collections
+1. Open the application in your browser
+2. Use the number fields to adjust the quantities of each card
+3. Cards that you can exchange between accounts are highlighted
+4. Use the "Save" button to preserve your data
+5. Use the "Copy" and "Import" buttons to share your collections
 
-## Technologies utilisées
+## Card Exchange System
 
-- HTML, CSS et JavaScript
-- Tailwind CSS pour les styles
-- Stockage local pour la persistance des données
+The application helps you track which cards can be exchanged between accounts:
+- Green background: Account has duplicates that can be given to others
+- Blue background: Account needs this card and others have duplicates
+- Green arrows (⟷): Exchange is possible between accounts
+
+## Technologies Used
+
+- HTML, CSS, and JavaScript
+- Tailwind CSS for styling
+- Local storage for data persistence
 
 ## Installation
 
-Aucune installation requise, l'application fonctionne directement dans le navigateur.
+No installation required, the application works directly in the browser.
 
-Pour les développeurs :
-1. Clonez ce dépôt
-<<<<<<< HEAD
-2. Ouvrez index.html dans votre navigateur
-=======
-2. Ouvrez index.html dans votre navigateur
->>>>>>> b4f2fd6a8855f180c47f2a385d14cd1e38d7de96
+For developers:
+1. Clone this repository
+2. Open index.html in your browser
+
+## French Version
+
+A French version of this application is available at [https://github.com/thibaut62/monopolyGo-Fr](https://github.com/thibaut62/monopolyGo-Fr)
+
+## Support
+
+If you find this application useful, consider supporting its development through the PayPal donation button in the application.
+
+---
+
+Developed with ❤️ for the MG... community by Thibaut Delville.
