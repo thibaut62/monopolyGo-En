@@ -42,7 +42,17 @@
     <body class="bg-gray-100 p-2 sm:p-4">
         <div class="max-w-7xl mx-auto">
             <h1 class="text-xl sm:text-2xl font-bold text-center mb-3">Gestion Cartes Monopoly Star Wars</h1>
-            
+            <div class="flex justify-center items-center mb-3 gap-2">
+                <span class="text-sm text-gray-600">Vous appréciez cette application ?</span>
+                <form action="https://www.paypal.com/donate" method="post" target="_blank">
+                    <input type="hidden" name="business" value="delville.thibaut@gmail.com" />
+                    <input type="hidden" name="no_recurring" value="0" />
+                    <input type="hidden" name="item_name" value="Soutien au développement de l'app Monopoly Star Wars" />
+                    <input type="hidden" name="currency_code" value="EUR" />
+                    <input type="image" src="https://www.paypalobjects.com/fr_FR/FR/i/btn/btn_donate_SM.gif" border="0" name="submit" title="PayPal - Un moyen sûr et facile de payer en ligne !" alt="Bouton Faire un don" />
+                    <img alt="" border="0" src="https://www.paypal.com/fr_FR/i/scr/pixel.gif" width="1" height="1" />
+                </form>
+            </div>
             <div class="flex gap-2 justify-center mb-3">
                 <button id="saveButton" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm sm:text-base sm:px-4">Sauvegarder</button>
                 <button id="loadButton" class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded text-sm sm:text-base sm:px-4">Charger</button>
