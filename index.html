@@ -1,77 +1,104 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion Cartes Monopoly Star Wars</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="js/cardsData.js"></script>
-    <style>
-        .gold-card {
-            background-color: #fef3c7;
-        }
-    </style>
-</head>
-<body class="bg-gray-100 p-4">
-    <div class="max-w-7xl mx-auto">
-        <h1 class="text-2xl font-bold text-center mb-4">Gestion Cartes Monopoly Star Wars</h1>
-        
-        <div class="flex gap-4 justify-center mb-4">
-            <button id="saveButton" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Sauvegarder</button>
-            <button id="loadButton" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Charger</button>
-        </div>
-        
-        <!-- Section de configuration des comptes -->
-        <div class="bg-white p-4 rounded shadow mb-4">
-            <h2 class="text-xl font-bold mb-2">Configuration des comptes</h2>
-            <div id="accountsList" class="mb-2">
-                <!-- Les comptes seront affichés ici -->
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta name="theme-color" content="#3b82f6"> <!-- Couleur thème pour les barres d'adresse mobiles -->
+        <title>Gestion Cartes Monopoly Star Wars</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="js/cardsData.js"></script>
+        <style>
+            .gold-card {
+                background-color: #fef3c7;
+            }
+            /* Styles pour améliorer l'expérience mobile */
+            @media (max-width: 640px) {
+                .quantity-input {
+                    width: 2.5rem;
+                    height: 2.5rem;
+                    font-size: 1rem;
+                    padding: 0;
+                }
+                th, td {
+                    padding: 0.5rem 0.25rem;
+                }
+                /* Ajuster la largeur du tableau pour mobile */
+                .table-container {
+                    overflow-x: auto;
+                    -webkit-overflow-scrolling: touch;
+                }
+            }
+            /* Styles pour l'app installée */
+            @media (display-mode: standalone) {
+                body {
+                    padding-top: env(safe-area-inset-top);
+                    padding-bottom: env(safe-area-inset-bottom);
+                    padding-left: env(safe-area-inset-left);
+                    padding-right: env(safe-area-inset-right);
+                }
+            }
+        </style>
+    </head>
+    <body class="bg-gray-100 p-2 sm:p-4">
+        <div class="max-w-7xl mx-auto">
+            <h1 class="text-xl sm:text-2xl font-bold text-center mb-3">Gestion Cartes Monopoly Star Wars</h1>
+            
+            <div class="flex gap-2 justify-center mb-3">
+                <button id="saveButton" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm sm:text-base sm:px-4">Sauvegarder</button>
+                <button id="loadButton" class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded text-sm sm:text-base sm:px-4">Charger</button>
             </div>
-            <div class="flex gap-2">
-                <input type="text" id="newAccountName" placeholder="Nom du nouveau compte" 
-                       class="border rounded px-2 py-1 flex-grow">
-                <button id="addAccountBtn" class="bg-blue-500 text-white px-3 py-1 rounded">
-                    Ajouter un compte
-                </button>
+            
+            <!-- Section de configuration des comptes -->
+            <div class="bg-white p-3 rounded shadow mb-3">
+                <h2 class="text-lg sm:text-xl font-bold mb-2">Configuration des comptes</h2>
+                <div id="accountsList" class="mb-2">
+                    <!-- Les comptes seront affichés ici -->
+                </div>
+                <div class="flex gap-2">
+                    <input type="text" id="newAccountName" placeholder="Nom du nouveau compte" 
+                           class="border rounded px-2 py-1 flex-grow text-sm sm:text-base">
+                    <button id="addAccountBtn" class="bg-blue-500 text-white px-2 py-1 rounded text-sm whitespace-nowrap">
+                        Ajouter
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Boutons de copie/import par compte -->
+            <div id="accountButtons" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mb-3">
+                <!-- Les boutons seront générés ici -->
+            </div>
+            
+            <!-- Statistiques -->
+            <div class="mb-3">
+                <h2 class="text-lg sm:text-xl font-bold mb-2">Statistiques</h2>
+                <div id="statistics" class="bg-white p-3 rounded shadow">
+                    <!-- Les statistiques seront affichées ici -->
+                </div>
+            </div>
+            
+            <!-- Informations sur les cartes -->
+            <div class="mb-2">
+                <p id="cardsInfo" class="text-xs sm:text-sm text-gray-600"></p>
+            </div>
+            
+            <!-- Tableau des cartes - Ajout de la classe table-container -->
+            <div class="bg-white rounded shadow table-container mb-4">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-100 border-b">
+                            <th class="py-2 px-1 sm:px-3 text-left">ID</th>
+                            <th class="py-2 px-1 sm:px-3 text-left">★</th>
+                            <th class="py-2 px-1 sm:px-3 text-left">Type</th>
+                            <th class="py-2 px-1 sm:px-3 text-left">Nom</th>
+                            <!-- Les en-têtes des comptes seront générés dynamiquement -->
+                        </tr>
+                    </thead>
+                    <tbody id="cardsTable">
+                        <!-- Les cartes seront affichées ici -->
+                    </tbody>
+                </table>
             </div>
         </div>
-        
-        <!-- Boutons de copie/import par compte -->
-        <div id="accountButtons" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mb-4">
-            <!-- Les boutons seront générés ici -->
-        </div>
-        
-        <!-- Statistiques -->
-        <div class="mb-4">
-            <h2 class="text-xl font-bold mb-2">Statistiques</h2>
-            <div id="statistics" class="bg-white p-4 rounded shadow">
-                <!-- Les statistiques seront affichées ici -->
-            </div>
-        </div>
-        
-        <!-- Informations sur les cartes -->
-        <div class="mb-2">
-            <p id="cardsInfo" class="text-sm text-gray-600"></p>
-        </div>
-        
-        <!-- Tableau des cartes -->
-        <div class="bg-white rounded shadow overflow-auto mb-4">
-            <table class="w-full">
-                <thead>
-                    <tr class="bg-gray-100 border-b">
-                        <th class="py-2 px-3 text-left">ID</th>
-                        <th class="py-2 px-3 text-left">★</th>
-                        <th class="py-2 px-3 text-left">Type</th>
-                        <th class="py-2 px-3 text-left">Nom</th>
-                        <!-- Les en-têtes des comptes seront générés dynamiquement -->
-                    </tr>
-                </thead>
-                <tbody id="cardsTable">
-                    <!-- Les cartes seront affichées ici -->
-                </tbody>
-            </table>
-        </div>
-    </div>
     
     <script>
         // Variables globales
