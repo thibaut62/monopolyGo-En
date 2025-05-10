@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <meta name="theme-color" content="#3b82f6"> <!-- Theme color for mobile address bars -->
-        <title>Star Wars Monopoly Cards Manager</title>
+        <title>Monopoly Cards Manager</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <script src="js/cardsData.js"></script>
         <style>
@@ -37,11 +37,65 @@
                     padding-right: env(safe-area-inset-right);
                 }
             }
+            /* Nouveau style pour le bouton de don fixe */
+            .floating-donate-button {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                z-index: 100;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1);
+                border-radius: 50px;
+                overflow: hidden;
+                transition: all 0.3s ease;
+                /* Ajout d'un fond légèrement transparent pour améliorer la lisibilité */
+                background-color: white;
+                /* Animation pour attirer l'attention */
+                animation: softPulse 5s infinite alternate;
+            }
+            
+            .floating-donate-btn {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                background-color: #3b82f6;
+                color: white;
+                font-weight: 500;
+                padding: 10px 16px;
+                transition: all 0.2s ease;
+            }
+            
+            .floating-donate-btn:hover {
+                background-color: #2563eb;
+            }
+            
+            /* Animation douce pour attirer l'attention */
+            @keyframes softPulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.03); }
+                100% { transform: scale(1); }
+            }
+            
+            /* Style compact pour les appareils mobiles */
+            @media (max-width: 640px) {
+                .floating-donate-button {
+                    bottom: 15px;
+                    right: 15px;
+                }
+                
+                .floating-donate-btn .btn-text {
+                    display: none; /* Cache le texte sur mobile */
+                }
+                
+                .floating-donate-btn {
+                    padding: 10px;
+                    border-radius: 50%; /* Rond sur mobile */
+                }
+            }
         </style>
     </head>
     <body class="bg-gray-100 p-2 sm:p-4">
         <div class="max-w-7xl mx-auto">
-            <h1 id="appTitle" class="text-xl sm:text-2xl font-bold text-center mb-3">Star Wars Monopoly Cards Manager</h1>
+            <h1 id="appTitle" class="text-xl sm:text-2xl font-bold text-center mb-3">Monopoly Cards Manager</h1>
             
             <div class="flex gap-2 justify-center mb-3">
                 <button id="saveButton" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm sm:text-base sm:px-4">Save</button>
@@ -118,7 +172,7 @@
                         </a>
                     </div>
                     
-                    <p id="developedWith" class="text-xs text-gray-500">Developed with ❤️ for the Star Wars community</p>
+                    <p id="developedWith" class="text-xs text-gray-500">Developed with ❤️ for the MGF... community</p>
                 </div>
             </div>
             
@@ -663,5 +717,18 @@
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', init);
     </script>
+    <div class="floating-donate-button">
+        <a href="https://www.paypal.com/donate/?business=delville.thibaut%40gmail.com&no_recurring=0&item_name=Support+for+Star+Wars+Monopoly+Cards+Manager&currency_code=EUR" 
+           target="_blank" 
+           rel="noopener noreferrer"
+           title="Support this project"
+           class="floating-donate-btn">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19.5 5.25H4.5C3.25736 5.25 2.25 6.25736 2.25 7.5V16.5C2.25 17.7426 3.25736 18.75 4.5 18.75H19.5C20.7426 18.75 21.75 17.7426 21.75 16.5V7.5C21.75 6.25736 20.7426 5.25 19.5 5.25Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M15.75 15.75H18M15 12.75H18.75M11.25 18.75V5.25M6.75 9.75H8.25C9.49264 9.75 10.5 10.7574 10.5 12V12C10.5 13.2426 9.49264 14.25 8.25 14.25H6.75V9.75Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="btn-text">Donate with PayPal</span>
+        </a>
+    </div>
 </body>
 </html>
