@@ -12,348 +12,608 @@
         }
     </style>
 </head>
-<body class="bg-gray-50">
-    <div class="container mx-auto px-4 py-6">
-        <h1 class="text-2xl font-bold mb-6 text-center">Gestion Cartes Monopoly Star Wars</h1>
+<body class="bg-gray-100 p-4">
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-2xl font-bold text-center mb-4">Gestion Cartes Monopoly Star Wars</h1>
         
-        <!-- Boutons de sauvegarde et chargement -->
-        <div class="mb-6 flex justify-center space-x-4">
-            <button id="saveButton" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">
-                Sauvegarder
-            </button>
-            <button id="loadButton" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded">
-                Charger
-            </button>
+        <div class="flex gap-4 justify-center mb-4">
+            <button id="saveButton" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Sauvegarder</button>
+            <button id="loadButton" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Charger</button>
         </div>
         
-        <!-- Import/Export pour les comptes -->
-        <div class="mb-6">
-            <div id="accountButtons" class="flex flex-wrap justify-center gap-2">
-                <!-- Généré dynamiquement -->
+        <!-- Section de configuration des comptes -->
+        <div class="bg-white p-4 rounded shadow mb-4">
+            <h2 class="text-xl font-bold mb-2">Configuration des comptes</h2>
+            <div id="accountsList" class="mb-2">
+                <!-- Les comptes seront affichés ici -->
             </div>
+            <div class="flex gap-2">
+                <input type="text" id="newAccountName" placeholder="Nom du nouveau compte" 
+                       class="border rounded px-2 py-1 flex-grow">
+                <button id="addAccountBtn" class="bg-blue-500 text-white px-3 py-1 rounded">
+                    Ajouter un compte
+                </button>
+            </div>
+        </div>
+        
+        <!-- Boutons de copie/import par compte -->
+        <div id="accountButtons" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mb-4">
+            <!-- Les boutons seront générés ici -->
         </div>
         
         <!-- Statistiques -->
-        <div class="mb-6 overflow-x-auto bg-gray-100 p-4 rounded-lg">
-            <h2 class="text-lg font-semibold mb-2">Statistiques</h2>
-            <div id="statistics" class="flex flex-wrap justify-center gap-4">
-                <!-- Généré dynamiquement -->
+        <div class="mb-4">
+            <h2 class="text-xl font-bold mb-2">Statistiques</h2>
+            <div id="statistics" class="bg-white p-4 rounded shadow">
+                <!-- Les statistiques seront affichées ici -->
             </div>
         </div>
         
-        <!-- Liste des cartes -->
-        <div class="overflow-x-auto">
-            <table class="min-w-full bg-white border rounded-lg">
+        <!-- Informations sur les cartes -->
+        <div class="mb-2">
+            <p id="cardsInfo" class="text-sm text-gray-600"></p>
+        </div>
+        
+        <!-- Tableau des cartes -->
+        <div class="bg-white rounded shadow overflow-auto mb-4">
+            <table class="w-full">
                 <thead>
-                    <tr class="bg-gray-200 text-gray-700">
+                    <tr class="bg-gray-100 border-b">
                         <th class="py-2 px-3 text-left">ID</th>
-                        <th class="py-2 px-3 text-left">⭐</th>
+                        <th class="py-2 px-3 text-left">★</th>
                         <th class="py-2 px-3 text-left">Type</th>
                         <th class="py-2 px-3 text-left">Nom</th>
-                        <th class="py-2 px-3 text-center account-header">thib gros</th>
-                        <th class="py-2 px-3 text-center account-header">thib petit</th>
+                        <!-- Les en-têtes des comptes seront générés dynamiquement -->
                     </tr>
                 </thead>
                 <tbody id="cardsTable">
-                    <!-- Généré dynamiquement -->
+                    <!-- Les cartes seront affichées ici -->
                 </tbody>
             </table>
-        </div>
-        
-        <!-- Informations -->
-        <div class="mt-6 text-center text-gray-500 text-sm">
-            <p>Application de Gestion des Cartes Monopoly Star Wars</p>
-            <p>Les données sont stockées localement dans votre navigateur</p>
-            <p id="cardsInfo">Total des cartes: 0 (dont 0 cartes OR)</p>
         </div>
     </div>
     
     <script>
-    // Variables globales
-    let cards = [];
-    const accounts = ["thib gros", "thib petit"];
-
-    // Fonction d'initialisation
-    function init() {
-        console.log("Initialisation de l'application...");
-        console.log("Nombre de cartes disponibles:", cardsData.length);
+        // Variables globales
+        let cards = [];
+        let accounts = [];
         
-        // Charger les données sauvegardées ou initialiser
-        const savedData = localStorage.getItem('monopolyData');
-        if (savedData) {
-            try {
-                const data = JSON.parse(savedData);
-                cards = data.cards;
-                console.log("Données chargées depuis le stockage local:", cards.length, "cartes");
-            } catch (e) {
-                console.error("Erreur lors du chargement des données:", e);
+        // Fonction pour initialiser le stockage avec des valeurs par défaut si nécessaire
+        function initializeStorage() {
+            if (!localStorage.getItem('monopolyAccounts')) {
+                // Configuration par défaut : 2 comptes
+                const defaultAccounts = ["Compte 1", "Compte 2"];
+                localStorage.setItem('monopolyAccounts', JSON.stringify(defaultAccounts));
+            }
+        }
+
+        // Fonction pour charger les comptes depuis le stockage local
+        function loadAccounts() {
+            initializeStorage();
+            return JSON.parse(localStorage.getItem('monopolyAccounts'));
+        }
+
+        // Fonction pour sauvegarder les comptes dans le stockage local
+        function saveAccounts(accounts) {
+            localStorage.setItem('monopolyAccounts', JSON.stringify(accounts));
+        }
+
+        // Fonction pour ajouter un nouveau compte
+        function addAccount(name) {
+            const accounts = loadAccounts();
+            accounts.push(name);
+            saveAccounts(accounts);
+            return accounts;
+        }
+
+        // Fonction pour supprimer un compte
+        function removeAccount(index) {
+            const accounts = loadAccounts();
+            // Vérifier qu'il reste au moins un compte
+            if (accounts.length <= 1) {
+                alert("Vous devez conserver au moins un compte.");
+                return accounts;
+            }
+            
+            // Supprimer le compte
+            accounts.splice(index, 1);
+            
+            // Supprimer les quantités associées à ce compte
+            cards = cards.map(card => {
+                const newQuantities = card.quantities.filter((_, i) => i !== index);
+                return { ...card, quantities: newQuantities };
+            });
+            
+            saveAccounts(accounts);
+            saveData(); // Sauvegarder aussi les cartes modifiées
+            return accounts;
+        }
+
+        // Fonction pour renommer un compte
+        function renameAccount(index, newName) {
+            const accounts = loadAccounts();
+            accounts[index] = newName;
+            saveAccounts(accounts);
+            return accounts;
+        }
+
+        // Fonction d'initialisation
+        function init() {
+            console.log("Initialisation de l'application...");
+            
+            // Tenter de migrer les anciennes données s'il y en a
+            migrateOldData();
+            
+            // Charger les comptes
+            accounts = loadAccounts();
+            
+            // Charger les données sauvegardées ou initialiser
+            const savedData = localStorage.getItem('monopolyData');
+            if (savedData) {
+                try {
+                    const data = JSON.parse(savedData);
+                    cards = data.cards;
+                    
+                    // Vérifier si le nombre de comptes a changé
+                    if (cards.length > 0 && cards[0].quantities.length !== accounts.length) {
+                        // Adapter les quantités au nouveau nombre de comptes
+                        adjustQuantities();
+                    }
+                    
+                    console.log("Données chargées depuis le stockage local:", cards.length, "cartes");
+                } catch (e) {
+                    console.error("Erreur lors du chargement des données:", e);
+                    initializeDefaultData();
+                }
+            } else {
+                console.log("Aucune donnée sauvegardée, initialisation par défaut...");
                 initializeDefaultData();
             }
-        } else {
-            console.log("Aucune donnée sauvegardée, initialisation par défaut...");
-            initializeDefaultData();
+
+            // Afficher les comptes
+            renderAccounts();
+            
+            // Initialiser les boutons des comptes
+            renderAccountButtons();
+            
+            // Afficher les cartes
+            renderCards();
+            
+            // Mettre à jour les statistiques
+            updateStatistics();
+            
+            // Ajouter la légende pour les échanges
+            renderLegend();
+            
+            // Ajouter les écouteurs d'événements
+            addEventListeners();
         }
 
-        // Initialiser les boutons des comptes
-        renderAccountButtons();
-        
-        // Afficher les cartes
-        renderCards();
-        
-        // Mettre à jour les statistiques
-        updateStatistics();
-        
-        // Ajouter les écouteurs d'événements aux boutons
-        document.getElementById('saveButton').addEventListener('click', saveData);
-        document.getElementById('loadButton').addEventListener('click', loadData);
-    }
-
-    // Fonction pour initialiser les données par défaut
-    function initializeDefaultData() {
-        // Ajouter les quantités à chaque carte
-        cards = cardsData.map(card => ({
-            ...card,
-            quantities: [0, 0] // Initialiser avec des zéros pour chaque compte
-        }));
-        console.log("Données par défaut initialisées:", cards.length, "cartes");
-    }
-
-    // Fonction pour afficher les boutons des comptes
-    function renderAccountButtons() {
-        const container = document.getElementById('accountButtons');
-        container.innerHTML = '';
-        
-        accounts.forEach((account, index) => {
-            const div = document.createElement('div');
-            div.className = 'flex space-x-1 items-center bg-gray-100 p-2 rounded';
-            div.innerHTML = `
-                <span class="font-medium">${account}</span>
-                <div class="flex space-x-1">
-                    <button class="copy-button bg-purple-500 hover:bg-purple-600 text-white py-1 px-2 rounded text-xs" data-index="${index}">
-                        Copier
-                    </button>
-                    <button class="import-button bg-amber-500 hover:bg-amber-600 text-white py-1 px-2 rounded text-xs" data-index="${index}">
-                        Importer
-                    </button>
-                </div>
-            `;
-            container.appendChild(div);
-        });
-        
-        // Ajouter les écouteurs d'événements
-        document.querySelectorAll('.copy-button').forEach(button => {
-            button.addEventListener('click', function() {
-                const index = parseInt(this.getAttribute('data-index'));
-                copyQuantitiesForAccount(index);
-            });
-        });
-        
-        document.querySelectorAll('.import-button').forEach(button => {
-            button.addEventListener('click', function() {
-                const index = parseInt(this.getAttribute('data-index'));
-                importQuantitiesForAccount(index);
-            });
-        });
-    }
-
-    // Fonction pour afficher les cartes avec mise en évidence des échanges possibles
-    function renderCards() {
-        console.log("Rendu des cartes...", cards.length, "cartes à afficher");
-        
-        const tbody = document.getElementById('cardsTable');
-        tbody.innerHTML = '';
-        
-        cards.forEach(card => {
-            const tr = document.createElement('tr');
-            
-            // Déterminer si des échanges sont possibles entre les comptes
-            const account0HasExtra = card.quantities[0] > 1;
-            const account1HasExtra = card.quantities[1] > 1;
-            const account0Needs = card.quantities[0] === 0;
-            const account1Needs = card.quantities[1] === 0;
-            
-            // Définir les classes CSS en fonction des possibilités d'échange
-            let account0Class = '';
-            let account1Class = '';
-            
-            if (account0HasExtra && account1Needs) {
-                // Le compte 0 a des extras et le compte 1 en a besoin
-                account0Class = 'bg-green-100 border-green-300 border';
-                account1Class = 'bg-blue-100 border-blue-300 border';
+        // Fonction pour migrer les anciennes données (thib gros/petit) vers le nouveau format
+        function migrateOldData() {
+            // Vérifier si nous avons déjà des comptes configurés
+            if (localStorage.getItem('monopolyAccounts')) {
+                return; // Déjà migré
             }
             
-            if (account1HasExtra && account0Needs) {
-                // Le compte 1 a des extras et le compte 0 en a besoin
-                account1Class = 'bg-green-100 border-green-300 border';
-                account0Class = 'bg-blue-100 border-blue-300 border';
-            }
-            
-            // Classe de base pour la ligne
-            tr.className = `border-t hover:bg-gray-50 ${card.isGold ? 'gold-card' : ''}`;
-            
-            tr.innerHTML = `
-                <td class="py-2 px-3">${card.id}</td>
-                <td class="py-2 px-3">${'⭐'.repeat(card.stars)}</td>
-                <td class="py-2 px-3">
-                    ${card.isGold ? 
-                        '<span class="inline-block bg-yellow-200 text-yellow-800 px-2 py-1 rounded text-xs font-bold">OR</span>' : 
-                        '<span class="inline-block bg-gray-200 text-gray-800 px-2 py-1 rounded text-xs">Standard</span>'
+            // Vérifier s'il y a d'anciennes données à migrer
+            const savedData = localStorage.getItem('monopolyData');
+            if (savedData) {
+                try {
+                    const data = JSON.parse(savedData);
+                    
+                    // Si les données ont l'ancien format avec "thib gros" et "thib petit"
+                    if (data.cards && data.cards.length > 0 && data.cards[0].quantities && data.cards[0].quantities.length === 2) {
+                        // Créer les comptes avec les anciens noms
+                        localStorage.setItem('monopolyAccounts', JSON.stringify(["thib gros", "thib petit"]));
+                        console.log("Migration réussie des anciens comptes");
                     }
-                </td>
-                <td class="py-2 px-3">${card.name}</td>
-                <td class="py-2 px-3 text-center ${account0Class}">
-                    <input type="number" min="0" class="quantity-input w-12 text-center border rounded" 
-                        data-card-id="${card.id}" data-account-index="0" value="${card.quantities[0]}">
-                    ${account0HasExtra && account1Needs ? 
-                        '<span class="inline-block ml-1 text-green-600 text-xs">→</span>' : ''}
-                </td>
-                <td class="py-2 px-3 text-center ${account1Class}">
-                    <input type="number" min="0" class="quantity-input w-12 text-center border rounded" 
-                        data-card-id="${card.id}" data-account-index="1" value="${card.quantities[1]}">
-                    ${account1HasExtra && account0Needs ? 
-                        '<span class="inline-block mr-1 text-green-600 text-xs">←</span>' : ''}
-                </td>
-            `;
-            
-            tbody.appendChild(tr);
-        });
-        
-        // Mettre à jour les informations des cartes
-        document.getElementById('cardsInfo').textContent = `Total des cartes: ${cards.length} (dont ${cards.filter(c => c.isGold).length} cartes OR)`;
-        
-        // Ajouter les écouteurs d'événements aux inputs
-        document.querySelectorAll('.quantity-input').forEach(input => {
-            input.addEventListener('change', function() {
-                const cardId = parseInt(this.getAttribute('data-card-id'));
-                const accountIndex = parseInt(this.getAttribute('data-account-index'));
-                const newValue = parseInt(this.value) || 0;
-                
-                updateQuantity(cardId, accountIndex, newValue);
-            });
-        });
-    }
-
-    // Fonction pour mettre à jour la quantité d'une carte
-    function updateQuantity(cardId, accountIndex, newValue) {
-        cards = cards.map(card => {
-            if (card.id === cardId) {
-                const newQuantities = [...card.quantities];
-                newQuantities[accountIndex] = newValue;
-                return { ...card, quantities: newQuantities };
+                } catch (e) {
+                    console.error("Erreur lors de la migration:", e);
+                }
             }
-            return card;
-        });
-        
-        // Mettre à jour les statistiques
-        updateStatistics();
-    }
+        }
 
-    // Fonction pour mettre à jour les statistiques
-function updateStatistics() {
-    const container = document.getElementById('statistics');
-    container.innerHTML = '';
-    
-    // Calculer le nombre de cartes uniques possédées par compte
-    const uniqueCardsByAccount = accounts.map((_, index) => {
-        return cards.filter(card => card.quantities[index] > 0).length;
-    });
-    
-    // Afficher les statistiques par compte sans le total
-    accounts.forEach((account, index) => {
-        const div = document.createElement('div');
-        div.className = 'text-center bg-white p-2 rounded shadow';
-        div.innerHTML = `
-            <div class="font-medium">${account}</div>
-            <div class="text-xl font-bold">${uniqueCardsByAccount[index]}</div>
-        `;
-        container.appendChild(div);
-    });
-    
-    // Ne pas afficher de total du tout
-}
-        
+        // Fonction pour ajuster les quantités si le nombre de comptes change
+        function adjustQuantities() {
+            cards = cards.map(card => {
+                let newQuantities = [...card.quantities];
+                
+                // Si le nombre de comptes a augmenté, ajouter des zéros
+                while (newQuantities.length < accounts.length) {
+                    newQuantities.push(0);
+                }
+                
+                // Si le nombre de comptes a diminué, tronquer
+                if (newQuantities.length > accounts.length) {
+                    newQuantities = newQuantities.slice(0, accounts.length);
+                }
+                
+                return { ...card, quantities: newQuantities };
+            });
+        }
 
+        // Fonction pour initialiser les données par défaut
+        function initializeDefaultData() {
+            cards = cardsData.map(card => {
+                // Créer un tableau de quantités avec un zéro par compte
+                const quantities = new Array(accounts.length).fill(0);
+                return { ...card, quantities };
+            });
+        }
 
-    // Fonction pour sauvegarder les données
-    function saveData() {
-        const data = {
-            cards: cards,
-            accounts: accounts
-        };
-        localStorage.setItem('monopolyData', JSON.stringify(data));
-        alert('Données sauvegardées avec succès!');
-    }
+        // Fonction pour rendre la liste des comptes
+        function renderAccounts() {
+            const container = document.getElementById('accountsList');
+            container.innerHTML = '';
+            
+            accounts.forEach((account, index) => {
+                const accountDiv = document.createElement('div');
+                accountDiv.className = 'flex items-center justify-between p-2 border-b';
+                accountDiv.innerHTML = `
+                    <span class="flex-grow">${account}</span>
+                    <div class="flex gap-2">
+                        <button class="rename-account-btn bg-yellow-500 text-white px-2 py-1 rounded text-xs" 
+                                data-index="${index}">
+                            Renommer
+                        </button>
+                        <button class="remove-account-btn bg-red-500 text-white px-2 py-1 rounded text-xs" 
+                                data-index="${index}">
+                            Supprimer
+                        </button>
+                    </div>
+                `;
+                container.appendChild(accountDiv);
+            });
+            
+            // Ajouter les écouteurs d'événements pour les boutons
+            document.querySelectorAll('.rename-account-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    const newName = prompt('Nouveau nom pour le compte:', accounts[index]);
+                    if (newName && newName.trim() !== '') {
+                        accounts = renameAccount(index, newName.trim());
+                        renderAccounts();
+                        renderAccountButtons();
+                        renderCards();
+                        updateStatistics();
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.remove-account-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    if (confirm(`Êtes-vous sûr de vouloir supprimer le compte "${accounts[index]}" ?`)) {
+                        accounts = removeAccount(index);
+                        renderAccounts();
+                        renderAccountButtons();
+                        renderCards();
+                        updateStatistics();
+                    }
+                });
+            });
+        }
 
-    // Fonction pour charger les données
-    function loadData() {
-        const savedData = localStorage.getItem('monopolyData');
-        if (savedData) {
+        // Fonction pour rendre les boutons des comptes
+        function renderAccountButtons() {
+            const container = document.getElementById('accountButtons');
+            container.innerHTML = '';
+            
+            accounts.forEach((account, index) => {
+                const div = document.createElement('div');
+                div.className = 'mb-2';
+                div.innerHTML = `
+                    <div class="text-sm font-medium mb-1">${account}</div>
+                    <div class="flex gap-2">
+                        <button class="copy-btn bg-blue-500 text-white px-2 py-1 rounded text-xs" 
+                                data-account-index="${index}">Copier</button>
+                        <button class="import-btn bg-green-500 text-white px-2 py-1 rounded text-xs" 
+                                data-account-index="${index}">Importer</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+            
+            // Ajouter les écouteurs d'événements
+            document.querySelectorAll('.copy-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const accountIndex = parseInt(this.getAttribute('data-account-index'));
+                    copyAccount(accountIndex);
+                });
+            });
+            
+            document.querySelectorAll('.import-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const accountIndex = parseInt(this.getAttribute('data-account-index'));
+                    importAccount(accountIndex);
+                });
+            });
+        }
+
+        // Fonction pour copier les quantités d'un compte
+        function copyAccount(accountIndex) {
+            const quantitiesText = cards
+                .filter(card => card.quantities[accountIndex] > 0)
+                .map(card => `${card.id}:${card.quantities[accountIndex]}`)
+                .join(',');
+            
+            navigator.clipboard.writeText(quantitiesText)
+                .then(() => {
+                    alert(`Données de ${accounts[accountIndex]} copiées dans le presse-papier.`);
+                })
+                .catch(err => {
+                    console.error('Erreur lors de la copie:', err);
+                    alert('Erreur lors de la copie des données.');
+                });
+        }
+
+        // Fonction pour importer les quantités d'un compte
+        function importAccount(accountIndex) {
+            const input = prompt(`Collez les données à importer pour ${accounts[accountIndex]}`);
+            if (!input) return;
+            
             try {
-                const data = JSON.parse(savedData);
-                cards = data.cards;
+                const pairs = input.split(',');
+                pairs.forEach(pair => {
+                    const [cardId, quantity] = pair.split(':').map(Number);
+                    if (isNaN(cardId) || isNaN(quantity)) return;
+                    
+                    const cardIndex = cards.findIndex(card => card.id === cardId);
+                    if (cardIndex !== -1) {
+                        cards[cardIndex].quantities[accountIndex] = quantity;
+                    }
+                });
+                
+                alert(`Données importées pour ${accounts[accountIndex]}.`);
                 renderCards();
                 updateStatistics();
-                alert('Données chargées avec succès!');
+                
             } catch (e) {
-                console.error("Erreur lors du chargement des données:", e);
-                alert("Erreur lors du chargement des données.");
+                console.error('Erreur lors de l\'importation:', e);
+                alert('Format des données invalide. Veuillez vérifier et réessayer.');
             }
-        } else {
-            alert('Aucune donnée sauvegardée trouvée.');
         }
-    }
 
-    // Fonction pour copier les quantités d'un compte
-    function copyQuantitiesForAccount(accountIndex) {
-        const quantities = cards.map(card => card.quantities[accountIndex]).join('\n');
-        navigator.clipboard.writeText(`Quantity\n${quantities}`)
-            .then(() => {
-                alert(`Les quantités pour ${accounts[accountIndex]} ont été copiées dans le presse-papiers.`);
-            })
-            .catch(() => {
-                // Fallback pour les navigateurs qui ne supportent pas l'API Clipboard
-                const textarea = document.createElement('textarea');
-                textarea.value = `Quantity\n${quantities}`;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-                alert(`Les quantités pour ${accounts[accountIndex]} ont été copiées dans le presse-papiers.`);
+        // Mise à jour de l'affichage des cartes pour prendre en compte un nombre variable de comptes
+        function renderCards() {
+            console.log("Rendu des cartes...", cards.length, "cartes à afficher");
+            
+            const tbody = document.getElementById('cardsTable');
+            tbody.innerHTML = '';
+            
+            // Mettre à jour l'en-tête du tableau pour afficher tous les comptes
+            const thead = document.querySelector('thead tr');
+            thead.innerHTML = `
+                <th class="py-2 px-3 text-left">ID</th>
+                <th class="py-2 px-3 text-left">★</th>
+                <th class="py-2 px-3 text-left">Type</th>
+                <th class="py-2 px-3 text-left">Nom</th>
+                ${accounts.map(account => `<th class="py-2 px-3 text-center">${account}</th>`).join('')}
+            `;
+            
+            cards.forEach(card => {
+                const tr = document.createElement('tr');
+                tr.className = `border-t hover:bg-gray-50 ${card.isGold ? 'gold-card' : ''}`;
+                
+                // Cellules de base
+                let html = `
+                    <td class="py-2 px-3">${card.id}</td>
+                    <td class="py-2 px-3">${'⭐'.repeat(card.stars)}</td>
+                    <td class="py-2 px-3">
+                        ${card.isGold ? 
+                            '<span class="inline-block bg-yellow-200 text-yellow-800 px-2 py-1 rounded text-xs font-bold">OR</span>' : 
+                            '<span class="inline-block bg-gray-200 text-gray-800 px-2 py-1 rounded text-xs">Standard</span>'
+                        }
+                    </td>
+                    <td class="py-2 px-3">${card.name}</td>
+                `;
+                
+                // Ajouter une cellule pour chaque compte
+                accounts.forEach((_, accountIndex) => {
+                    // Vérifier s'il peut y avoir des échanges
+                    let accountClass = '';
+                    let exchangeIndicator = '';
+                    
+                    // Détecter les possibilités d'échange
+                    const hasExtra = card.quantities[accountIndex] > 1;
+                    
+                    // Vérifier si d'autres comptes ont besoin de cette carte
+                    const otherAccountsNeed = accounts.some((_, otherIndex) => 
+                        otherIndex !== accountIndex && card.quantities[otherIndex] === 0
+                    );
+                    
+                    if (hasExtra && otherAccountsNeed) {
+                        accountClass = 'bg-green-100 border-green-300 border';
+                        exchangeIndicator = '<span class="inline-block ml-1 text-green-600 text-xs">⟷</span>';
+                    }
+                    
+                    const needsCard = card.quantities[accountIndex] === 0;
+                    const otherAccountsHaveExtra = accounts.some((_, otherIndex) => 
+                        otherIndex !== accountIndex && card.quantities[otherIndex] > 1
+                    );
+                    
+                    if (needsCard && otherAccountsHaveExtra) {
+                        accountClass = 'bg-blue-100 border-blue-300 border';
+                    }
+                    
+                    html += `
+                        <td class="py-2 px-3 text-center ${accountClass}">
+                            <input type="number" min="0" class="quantity-input w-12 text-center border rounded" 
+                                data-card-id="${card.id}" data-account-index="${accountIndex}" value="${card.quantities[accountIndex]}">
+                            ${exchangeIndicator}
+                        </td>
+                    `;
+                });
+                
+                tr.innerHTML = html;
+                tbody.appendChild(tr);
             });
-    }
-
-    // Fonction pour importer les quantités d'un compte
-    function importQuantitiesForAccount(accountIndex) {
-        const input = prompt("Collez les quantités (une par ligne, commençant par 'Quantity'):");
-        if (!input) return;
-        
-        const lines = input.split('\n');
-        if (lines.length < 2 || lines[0].trim() !== 'Quantity') {
-            alert("Format invalide. Assurez-vous que les données commencent par 'Quantity'.");
-            return;
+            
+            // Mettre à jour les informations des cartes
+            document.getElementById('cardsInfo').textContent = `Total des cartes: ${cards.length} (dont ${cards.filter(c => c.isGold).length} cartes OR)`;
+            
+            // Ajouter les écouteurs d'événements aux inputs
+            addQuantityInputListeners();
         }
-        
-        const quantities = lines.slice(1).map(line => parseInt(line.trim(), 10) || 0);
-        if (quantities.length !== cards.length) {
-            alert(`Nombre de quantités (${quantities.length}) ne correspond pas au nombre de cartes (${cards.length}).`);
-            return;
-        }
-        
-        // Mettre à jour les quantités
-        cards = cards.map((card, index) => {
-            const newQuantities = [...card.quantities];
-            newQuantities[accountIndex] = quantities[index];
-            return { ...card, quantities: newQuantities };
-        });
-        
-        // Mettre à jour l'interface
-        renderCards();
-        updateStatistics();
-        alert(`Importation réussie pour ${accounts[accountIndex]}.`);
-    }
 
-    // Initialiser l'application au chargement
-    document.addEventListener('DOMContentLoaded', init);
+        // Fonction séparée pour ajouter les écouteurs aux inputs de quantité
+        function addQuantityInputListeners() {
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.addEventListener('change', function() {
+                    const cardId = parseInt(this.getAttribute('data-card-id'));
+                    const accountIndex = parseInt(this.getAttribute('data-account-index'));
+                    const newValue = parseInt(this.value) || 0;
+                    
+                    updateQuantity(cardId, accountIndex, newValue);
+                });
+            });
+        }
+
+        // Fonction pour mettre à jour la quantité d'une carte
+        function updateQuantity(cardId, accountIndex, newValue) {
+            cards = cards.map(card => {
+                if (card.id === cardId) {
+                    const newQuantities = [...card.quantities];
+                    newQuantities[accountIndex] = newValue;
+                    return { ...card, quantities: newQuantities };
+                }
+                return card;
+            });
+            
+            // Mettre à jour les statistiques
+            updateStatistics();
+            
+            // Rafraîchir l'affichage des cartes pour mettre à jour les indicateurs d'échange
+            renderCards();
+        }
+
+        // Modification de la fonction updateStatistics pour un nombre variable de comptes
+        function updateStatistics() {
+            const container = document.getElementById('statistics');
+            container.innerHTML = '';
+            
+            // Créer un conteneur flex pour l'affichage horizontal
+            const flexContainer = document.createElement('div');
+            flexContainer.className = 'flex flex-wrap justify-center gap-4';
+            container.appendChild(flexContainer);
+            
+            // Calculer le nombre de cartes uniques possédées par compte
+            const uniqueCardsByAccount = accounts.map((_, index) => {
+                return cards.filter(card => card.quantities[index] > 0).length;
+            });
+            
+            // Afficher les statistiques pour chaque compte
+            accounts.forEach((account, index) => {
+                const div = document.createElement('div');
+                div.className = 'text-center bg-white p-2 rounded shadow';
+                div.innerHTML = `
+                    <div class="font-medium">${account}</div>
+                    <div class="text-xl font-bold">${uniqueCardsByAccount[index]}</div>
+                `;
+                flexContainer.appendChild(div);
+            });
+        }
+
+        // Fonction pour ajouter une légende expliquant les indicateurs d'échange
+        function renderLegend() {
+            const infoDiv = document.getElementById('cardsInfo');
+            
+            // Créer un conteneur pour la légende
+            const legendDiv = document.createElement('div');
+            legendDiv.className = 'mt-2 text-sm flex flex-wrap gap-4 justify-center';
+            
+            // Ajouter les explications des indicateurs
+            legendDiv.innerHTML = `
+                <div class="flex items-center">
+                    <span class="inline-block w-4 h-4 bg-green-100 border border-green-300 mr-1"></span>
+                    <span>Peut donner (doublons)</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="inline-block w-4 h-4 bg-blue-100 border border-blue-300 mr-1"></span>
+                    <span>Besoin (manquante)</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="inline-block mr-1 text-green-600">⟷</span>
+                    <span>Échange possible</span>
+                </div>
+            `;
+            
+            // Insérer la légende après les infos des cartes
+            infoDiv.parentNode.insertBefore(legendDiv, infoDiv.nextSibling);
+        }
+
+        // Fonction pour ajouter tous les écouteurs d'événements
+        function addEventListeners() {
+            // Boutons existants
+            document.getElementById('saveButton').addEventListener('click', saveData);
+            document.getElementById('loadButton').addEventListener('click', loadData);
+            
+            // Nouveaux boutons pour les comptes
+            document.getElementById('addAccountBtn').addEventListener('click', function() {
+                const input = document.getElementById('newAccountName');
+                const name = input.value.trim();
+                
+                if (name !== '') {
+                    accounts = addAccount(name);
+                    input.value = '';
+                    renderAccounts();
+                    renderAccountButtons();
+                    adjustQuantities();
+                    renderCards();
+                    updateStatistics();
+                }
+            });
+            
+            // Écouteur pour la touche Enter dans le champ de texte
+            document.getElementById('newAccountName').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('addAccountBtn').click();
+                }
+            });
+            
+            // Ajouter les écouteurs pour les inputs de quantité
+            addQuantityInputListeners();
+        }
+
+        // Fonction pour sauvegarder les données
+        function saveData() {
+            const data = {
+                cards: cards,
+                lastUpdate: new Date().toISOString()
+            };
+            
+            localStorage.setItem('monopolyData', JSON.stringify(data));
+            alert('Données sauvegardées avec succès !');
+        }
+
+        // Fonction pour charger les données
+        function loadData() {
+            const savedData = localStorage.getItem('monopolyData');
+            if (savedData) {
+                try {
+                    const data = JSON.parse(savedData);
+                    cards = data.cards;
+                    
+                    // Vérifier si le nombre de comptes a changé depuis la sauvegarde
+                    if (cards.length > 0 && cards[0].quantities.length !== accounts.length) {
+                        adjustQuantities();
+                    }
+                    
+                    renderCards();
+                    updateStatistics();
+                    alert('Données chargées avec succès !');
+                } catch (e) {
+                    console.error('Erreur lors du chargement des données:', e);
+                    alert('Erreur lors du chargement des données.');
+                }
+            } else {
+                alert('Aucune donnée sauvegardée trouvée.');
+            }
+        }
+
+        // Initialisation au chargement de la page
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
