@@ -403,7 +403,7 @@
             }
         }
 
-        // Update card display to take into account a variable number of accounts
+        // Update card display to include set number
         function renderCards() {
             console.log("Rendering cards...", cards.length, "cards to display");
             
@@ -421,9 +421,13 @@
                 const tr = document.createElement('tr');
                 tr.className = `border-t hover:bg-gray-50 ${card.isGold ? 'gold-card' : ''}`;
                 
-                // Name cell with stars after the name
+                // Calculate set number (assuming 9 cards per set, starting from set 1)
+                const setNumber = Math.floor((card.id - 1) / 9) + 1;
+                
+                // Name cell with set number, name, and stars
                 let html = `
                     <td class="py-2 px-3">
+                        <span class="inline-block bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs font-bold mr-2">Set ${setNumber}</span>
                         ${card.name} 
                         ${card.isGold ? 
                             '<span class="inline-block bg-yellow-200 text-yellow-800 px-2 py-1 rounded text-xs font-bold mx-1">GOLD</span>' : 
