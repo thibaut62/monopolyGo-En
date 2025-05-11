@@ -1,197 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-WHML7M93');</script>
-    <!-- End Google Tag Manager -->
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-        <meta name="theme-color" content="#3b82f6"> <!-- Theme color for mobile address bars -->
-        <title>Monopoly Cards Manager</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script src="js/cardsData.js"></script>
-        <style>
-            .gold-card {
-                background-color: #fef3c7;
-            }
-            /* Styles for better mobile experience */
-            @media (max-width: 640px) {
-                .quantity-input {
-                    width: 2.5rem;
-                    height: 2.5rem;
-                    font-size: 1rem;
-                    padding: 0;
-                }
-                th, td {
-                    padding: 0.5rem 0.25rem;
-                }
-                /* Adjust table width for mobile */
-                .table-container {
-                    overflow-x: auto;
-                    -webkit-overflow-scrolling: touch;
-                }
-            }
-            /* Styles for installed app */
-            @media (display-mode: standalone) {
-                body {
-                    padding-top: env(safe-area-inset-top);
-                    padding-bottom: env(safe-area-inset-bottom);
-                    padding-left: env(safe-area-inset-left);
-                    padding-right: env(safe-area-inset-right);
-                }
-            }
-            /* Nouveau style pour le bouton de don fixe */
-            .floating-donate-button {
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                z-index: 100;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1);
-                border-radius: 50px;
-                overflow: hidden;
-                transition: all 0.3s ease;
-                /* Ajout d'un fond légèrement transparent pour améliorer la lisibilité */
-                background-color: white;
-                /* Animation pour attirer l'attention */
-                animation: softPulse 5s infinite alternate;
-            }
-            
-            .floating-donate-btn {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                background-color: #3b82f6;
-                color: white;
-                font-weight: 500;
-                padding: 10px 16px;
-                transition: all 0.2s ease;
-            }
-            
-            .floating-donate-btn:hover {
-                background-color: #2563eb;
-            }
-            
-            /* Animation douce pour attirer l'attention */
-            @keyframes softPulse {
-                0% { transform: scale(1); }
-                50% { transform: scale(1.03); }
-                100% { transform: scale(1); }
-            }
-            
-            /* Style compact pour les appareils mobiles */
-            @media (max-width: 640px) {
-                .floating-donate-button {
-                    bottom: 15px;
-                    right: 15px;
-                }
-                
-                .floating-donate-btn .btn-text {
-                    display: none; /* Cache le texte sur mobile */
-                }
-                
-                .floating-donate-btn {
-                    padding: 10px;
-                    border-radius: 50%; /* Rond sur mobile */
-                }
-            }
-        </style>
-    </head>
-    <body class="bg-gray-100 p-2 sm:p-4">
-        <!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WHML7M93"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    <!-- End Google Tag Manager (noscript) -->
-        <div class="max-w-7xl mx-auto">
-            <h1 id="appTitle" class="text-xl sm:text-2xl font-bold text-center mb-3">Monopoly Cards Manager</h1>
-            
-            <div class="flex gap-2 justify-center mb-3">
-                <button id="saveButton" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm sm:text-base sm:px-4">Save</button>
-                <button id="loadButton" class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded text-sm sm:text-base sm:px-4">Load</button>
-            </div>
-            
-            <!-- Accounts configuration section -->
-            <div class="bg-white p-3 rounded shadow mb-3">
-                <h2 id="accountsTitle" class="text-lg sm:text-xl font-bold mb-2">Accounts Configuration</h2>
-                <div id="accountsList" class="mb-2">
-                    <!-- Accounts will be displayed here -->
-                </div>
-                <div class="flex gap-2">
-                    <input type="text" id="newAccountName" placeholder="New account name" 
-                           class="border rounded px-2 py-1 flex-grow text-sm sm:text-base">
-                    <button id="addAccountBtn" class="bg-blue-500 text-white px-2 py-1 rounded text-sm whitespace-nowrap">
-                        Add
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Account copy/import buttons -->
-            <div id="accountButtons" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mb-3">
-                <!-- Buttons will be generated here -->
-            </div>
-            
-            <!-- Statistics -->
-            <div class="mb-3">
-                <h2 id="statisticsTitle" class="text-lg sm:text-xl font-bold mb-2">Statistics</h2>
-                <div id="statistics" class="bg-white p-3 rounded shadow">
-                    <!-- Statistics will be displayed here -->
-                </div>
-            </div>
-            
-            <!-- Cards information -->
-            <div class="mb-2">
-                <p id="cardsInfo" class="text-xs sm:text-sm text-gray-600"></p>
-            </div>
-            
-            <!-- Cards table - Added table-container class -->
-            <div class="bg-white rounded shadow table-container mb-4">
-                <table class="w-full">
-                    <thead>
-                        <tr class="bg-gray-100 border-b">
-                            <th class="py-2 px-1 sm:px-3 text-left">ID</th>
-                            <th class="py-2 px-1 sm:px-3 text-left">★</th>
-                            <th class="py-2 px-1 sm:px-3 text-left">Name</th>
-                            <!-- Account headers will be generated dynamically -->
-                        </tr>
-                    </thead>
-                    <tbody id="cardsTable">
-                        <!-- Cards will be displayed here -->
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- PayPal donation section -->
-            <div class="mt-8 bg-white p-4 rounded shadow">
-                <div class="text-center">
-                    <!-- <h2 id="donationTitle" class="text-lg font-bold mb-2">Support this project</h2>
-                    <p id="donationText" class="text-gray-600 mb-4">If this application is useful to you, you can support its development with a donation. Thank you for your generosity!</p>
-                    
-                    <div class="flex justify-center mb-2">
-                        <a href="https://www.paypal.com/donate/?business=delville.thibaut%40gmail.com&no_recurring=0&item_name=Support+for+Star+Wars+Monopoly+Cards+Manager&currency_code=EUR" 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        id="donateButton"
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2">
-                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M19.5 5.25H4.5C3.25736 5.25 2.25 6.25736 2.25 7.5V16.5C2.25 17.7426 3.25736 18.75 4.5 18.75H19.5C20.7426 18.75 21.75 17.7426 21.75 16.5V7.5C21.75 6.25736 20.7426 5.25 19.5 5.25Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M15.75 15.75H18M15 12.75H18.75M11.25 18.75V5.25M6.75 9.75H8.25C9.49264 9.75 10.5 10.7574 10.5 12V12C10.5 13.2426 9.49264 14.25 8.25 14.25H6.75V9.75Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            <span>Donate with PayPal</span>
-                        </a>
-                    </div> -->
-                    
-                    <p id="developedWith" class="text-xs text-gray-500">Developed with ❤️ for the MGF... community</p>
-                </div>
-            </div>
-            
-            <!-- Link to French version -->
-            <p class="text-center text-sm mt-2">
-                <a href="https://github.com/thibaut62/monopolyGo-Fr" target="_blank" class="text-blue-600 hover:underline">Version française disponible ici</a>
-            </p>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monopoly Cards Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/cardsData.js"></script>
+    <style>
+        .gold-card {
+            background-color: #fef3c7;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4">
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-2xl font-bold text-center mb-4">Monopoly Cards Manager</h1>
+        
+        <div class="flex gap-4 justify-center mb-4">
+            <button id="saveButton" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Save</button>
+            <button id="loadButton" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Load</button>
         </div>
+        
+        <!-- Accounts configuration section -->
+        <div class="bg-white p-4 rounded shadow mb-4">
+            <h2 class="text-xl font-bold mb-2">Accounts Configuration</h2>
+            <div id="accountsList" class="mb-2">
+                <!-- Accounts will be displayed here -->
+            </div>
+            <div class="flex gap-2">
+                <input type="text" id="newAccountName" placeholder="New account name" 
+                       class="border rounded px-2 py-1 flex-grow">
+                <button id="addAccountBtn" class="bg-blue-500 text-white px-3 py-1 rounded">
+                    Add Account
+                </button>
+            </div>
+        </div>
+        
+        <!-- Account copy/import buttons -->
+        <div id="accountButtons" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mb-4">
+            <!-- Buttons will be generated here -->
+        </div>
+        
+        <!-- Statistics -->
+        <div class="mb-4">
+            <h2 class="text-xl font-bold mb-2">Statistics</h2>
+            <div id="statistics" class="bg-white p-4 rounded shadow">
+                <!-- Statistics will be displayed here -->
+            </div>
+        </div>
+        
+        <!-- Cards information -->
+        <div class="mb-2">
+            <p id="cardsInfo" class="text-sm text-gray-600"></p>
+        </div>
+        
+        <!-- Cards table -->
+        <div class="bg-white rounded shadow overflow-auto mb-4">
+            <table class="w-full">
+                <thead>
+                    <tr class="bg-gray-100 border-b">
+                        <th class="py-2 px-3 text-left">Name</th>
+                        <!-- Account headers will be generated dynamically -->
+                    </tr>
+                </thead>
+                <tbody id="cardsTable">
+                    <!-- Cards will be displayed here -->
+                </tbody>
+            </table>
+        </div>
+    
+    </div>
     
     <script>
         // Global variables
@@ -229,7 +107,7 @@
         // Function to remove an account
         function removeAccount(index) {
             const accounts = loadAccounts();
-            // Make sure there's at least one account left
+            // Check that at least one account remains
             if (accounts.length <= 1) {
                 alert("You must keep at least one account.");
                 return accounts;
@@ -238,7 +116,7 @@
             // Remove the account
             accounts.splice(index, 1);
             
-            // Remove the associated quantities from cards
+            // Remove quantities associated with this account
             cards = cards.map(card => {
                 const newQuantities = card.quantities.filter((_, i) => i !== index);
                 return { ...card, quantities: newQuantities };
@@ -259,9 +137,9 @@
 
         // Initialization function
         function init() {
-            console.log("Initializing application...");
+            console.log("Initializing the application...");
             
-            // Try to migrate old data if any
+            // Attempt to migrate old data if any
             migrateOldData();
             
             // Load accounts
@@ -276,7 +154,7 @@
                     
                     // Check if the number of accounts has changed
                     if (cards.length > 0 && cards[0].quantities.length !== accounts.length) {
-                        // Adapt quantities to the new number of accounts
+                        // Adjust quantities to the new number of accounts
                         adjustQuantities();
                     }
                     
@@ -286,7 +164,7 @@
                     initializeDefaultData();
                 }
             } else {
-                console.log("No saved data, initializing defaults...");
+                console.log("No saved data found, initializing defaults...");
                 initializeDefaultData();
             }
 
@@ -309,7 +187,7 @@
             addEventListeners();
         }
 
-        // Function to migrate old data (thib gros/petit) to new format
+        // Function to migrate old data (thib gros/petit) to the new format
         function migrateOldData() {
             // Check if we already have configured accounts
             if (localStorage.getItem('monopolyAccounts')) {
@@ -324,9 +202,9 @@
                     
                     // If the data has the old format with "thib gros" and "thib petit"
                     if (data.cards && data.cards.length > 0 && data.cards[0].quantities && data.cards[0].quantities.length === 2) {
-                        // Create accounts with old names
+                        // Create accounts with the old names
                         localStorage.setItem('monopolyAccounts', JSON.stringify(["thib gros", "thib petit"]));
-                        console.log("Successful migration of old accounts");
+                        console.log("Successfully migrated old accounts");
                     }
                 } catch (e) {
                     console.error("Error during migration:", e);
@@ -356,7 +234,7 @@
         // Function to initialize default data
         function initializeDefaultData() {
             cards = cardsData.map(card => {
-                // Create a quantities array with one zero per account
+                // Create a quantity array with a zero per account
                 const quantities = new Array(accounts.length).fill(0);
                 return { ...card, quantities };
             });
@@ -386,11 +264,11 @@
                 container.appendChild(accountDiv);
             });
             
-            // Add event listeners to the buttons
+            // Add event listeners for buttons
             document.querySelectorAll('.rename-account-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const index = parseInt(this.getAttribute('data-index'));
-                    const newName = prompt('New name for the account:', accounts[index]);
+                    const newName = prompt('New account name:', accounts[index]);
                     if (newName && newName.trim() !== '') {
                         accounts = renameAccount(index, newName.trim());
                         renderAccounts();
@@ -451,62 +329,90 @@
             });
         }
 
-        // Function to copy quantities from an account
+        // Function to copy account quantities - format one line per value
         function copyAccount(accountIndex) {
-            const quantitiesText = cards
-                .filter(card => card.quantities[accountIndex] > 0)
-                .map(card => `${card.id}:${card.quantities[accountIndex]}`)
-                .join(',');
+            // Start with "Quantity" to indicate the format
+            let quantitiesText = "Quantity\n";
+            
+            // Add each quantity on a new line
+            cards.forEach(card => {
+                quantitiesText += card.quantities[accountIndex] + "\n";
+            });
             
             navigator.clipboard.writeText(quantitiesText)
                 .then(() => {
                     alert(`${accounts[accountIndex]} data copied to clipboard.`);
                 })
                 .catch(err => {
-                    console.error('Error copying:', err);
-                    alert("Error copying data.");
+                    console.error('Error copying data:', err);
+                    alert('Error copying data.');
                 });
         }
 
-        // Function to import quantities for an account
+        // Function to import account quantities - format one line per value
         function importAccount(accountIndex) {
             const input = prompt(`Paste the data to import for ${accounts[accountIndex]}`);
-            if (!input) return;
+            if (!input || input.trim() === "") {
+                alert("No data provided.");
+                return;
+            }
             
             try {
-                const pairs = input.split(',');
-                pairs.forEach(pair => {
-                    const [cardId, quantity] = pair.split(':').map(Number);
-                    if (isNaN(cardId) || isNaN(quantity)) return;
-                    
-                    const cardIndex = cards.findIndex(card => card.id === cardId);
-                    if (cardIndex !== -1) {
-                        cards[cardIndex].quantities[accountIndex] = quantity;
-                    }
-                });
+                // Split the input by line breaks
+                let lines = input.split(/\r?\n/);
                 
-                alert(`Data imported for ${accounts[accountIndex]}.`);
-                renderCards();
-                updateStatistics();
+                // Remove the word "Quantity" if present in the first line
+                if (lines.length > 0 && lines[0].trim().toLowerCase() === "quantity") {
+                    lines = lines.slice(1);
+                }
+                
+                // Filter empty lines and convert to numbers
+                const quantities = lines
+                    .map(line => line.trim())
+                    .filter(line => line !== "")
+                    .map(line => parseInt(line, 10))
+                    .filter(num => !isNaN(num));
+                
+                console.log("Detected quantities:", quantities);
+                
+                if (quantities.length === 0) {
+                    alert("No valid quantities found.");
+                    return;
+                }
+                
+                let importCount = 0;
+                
+                // Process each quantity and assign to the corresponding card
+                for (let i = 0; i < Math.min(quantities.length, cards.length); i++) {
+                    cards[i].quantities[accountIndex] = quantities[i];
+                    importCount++;
+                }
+                
+                if (importCount > 0) {
+                    alert(`Import successful: ${importCount} cards updated for ${accounts[accountIndex]}.`);
+                    renderCards();
+                    updateStatistics();
+                    saveData(); // Save the changes
+                } else {
+                    alert("No cards could be imported.");
+                }
                 
             } catch (e) {
-                console.error('Error importing:', e);
-                alert("Invalid data format. Please check and try again.");
+                console.error('Error during import:', e);
+                alert('Error during import: ' + e.message);
             }
         }
 
-        // Updated function to render cards for a variable number of accounts
+        // Update card display to take into account a variable number of accounts
         function renderCards() {
             console.log("Rendering cards...", cards.length, "cards to display");
             
             const tbody = document.getElementById('cardsTable');
             tbody.innerHTML = '';
             
-            // Update table header to display all accounts
+            // Update the table header to display all accounts
             const thead = document.querySelector('thead tr');
             thead.innerHTML = `
-                <th class="py-2 px-3 text-left">ID</th>
-                <th class="py-2 px-3 text-left">★</th>
                 <th class="py-2 px-3 text-left">Name</th>
                 ${accounts.map(account => `<th class="py-2 px-3 text-center">${account}</th>`).join('')}
             `;
@@ -515,11 +421,16 @@
                 const tr = document.createElement('tr');
                 tr.className = `border-t hover:bg-gray-50 ${card.isGold ? 'gold-card' : ''}`;
                 
-                // Basic cells
+                // Name cell with stars after the name
                 let html = `
-                    <td class="py-2 px-3">${card.id}</td>
-                    <td class="py-2 px-3">${'⭐'.repeat(card.stars)}</td>
-                    <td class="py-2 px-3">${card.name}</td>
+                    <td class="py-2 px-3">
+                        ${card.name} 
+                        ${card.isGold ? 
+                            '<span class="inline-block bg-yellow-200 text-yellow-800 px-2 py-1 rounded text-xs font-bold mx-1">GOLD</span>' : 
+                            ''
+                        }
+                        <span class="text-yellow-500">${'⭐'.repeat(card.stars)}</span>
+                    </td>
                 `;
                 
                 // Add a cell for each account
@@ -563,14 +474,14 @@
                 tbody.appendChild(tr);
             });
             
-            // Update card information
+            // Update cards information
             document.getElementById('cardsInfo').textContent = `Total cards: ${cards.length} (including ${cards.filter(c => c.isGold).length} GOLD cards)`;
             
             // Add event listeners to inputs
             addQuantityInputListeners();
         }
 
-        // Separate function to add event listeners to quantity inputs
+        // Separate function to add listeners to quantity inputs
         function addQuantityInputListeners() {
             document.querySelectorAll('.quantity-input').forEach(input => {
                 input.addEventListener('change', function() {
@@ -597,11 +508,11 @@
             // Update statistics
             updateStatistics();
             
-            // Refresh the display to update exchange indicators
+            // Refresh the card display to update exchange indicators
             renderCards();
         }
 
-        // Updated function for a variable number of accounts
+        // Modified updateStatistics function for a variable number of accounts
         function updateStatistics() {
             const container = document.getElementById('statistics');
             container.innerHTML = '';
@@ -611,7 +522,7 @@
             flexContainer.className = 'flex flex-wrap justify-center gap-4';
             container.appendChild(flexContainer);
             
-            // Calculate the number of unique cards owned per account
+            // Calculate unique cards owned per account
             const uniqueCardsByAccount = accounts.map((_, index) => {
                 return cards.filter(card => card.quantities[index] > 0).length;
             });
@@ -628,7 +539,7 @@
             });
         }
 
-        // Function to add a legend explaining the exchange indicators
+        // Function to add a legend explaining exchange indicators
         function renderLegend() {
             const infoDiv = document.getElementById('cardsInfo');
             
@@ -636,7 +547,7 @@
             const legendDiv = document.createElement('div');
             legendDiv.className = 'mt-2 text-sm flex flex-wrap gap-4 justify-center';
             
-            // Add indicator explanations
+            // Add explanations for indicators
             legendDiv.innerHTML = `
                 <div class="flex items-center">
                     <span class="inline-block w-4 h-4 bg-green-100 border border-green-300 mr-1"></span>
@@ -644,15 +555,19 @@
                 </div>
                 <div class="flex items-center">
                     <span class="inline-block w-4 h-4 bg-blue-100 border border-blue-300 mr-1"></span>
-                    <span>Needs (missing)</span>
+                    <span>Need (missing)</span>
                 </div>
                 <div class="flex items-center">
                     <span class="inline-block mr-1 text-green-600">⟷</span>
                     <span>Exchange possible</span>
                 </div>
+                <div class="flex items-center">
+                    <span class="inline-block bg-yellow-200 text-yellow-800 px-2 py-1 rounded text-xs font-bold mr-1">GOLD</span>
+                    <span>GOLD card</span>
+                </div>
             `;
             
-            // Insert the legend after the cards info
+            // Insert the legend after the card info
             infoDiv.parentNode.insertBefore(legendDiv, infoDiv.nextSibling);
         }
 
@@ -678,14 +593,14 @@
                 }
             });
             
-            // Event listener for Enter key in text field
+            // Enter key listener in the text field
             document.getElementById('newAccountName').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     document.getElementById('addAccountBtn').click();
                 }
             });
             
-            // Add event listeners to quantity inputs
+            // Add listeners for quantity inputs
             addQuantityInputListeners();
         }
 
@@ -697,7 +612,7 @@
             };
             
             localStorage.setItem('monopolyData', JSON.stringify(data));
-            alert("Data saved successfully!");
+            alert('Data successfully saved!');
         }
 
         // Function to load data
@@ -715,31 +630,18 @@
                     
                     renderCards();
                     updateStatistics();
-                    alert("Data loaded successfully!");
+                    alert('Data successfully loaded!');
                 } catch (e) {
                     console.error('Error loading data:', e);
-                    alert("Error loading data.");
+                    alert('Error loading data.');
                 }
             } else {
-                alert("No saved data found.");
+                alert('No saved data found.');
             }
         }
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', init);
     </script>
-    <!-- <div class="floating-donate-button">
-        <a href="https://www.paypal.com/donate/?business=delville.thibaut%40gmail.com&no_recurring=0&item_name=Support+for+Star+Wars+Monopoly+Cards+Manager&currency_code=EUR" 
-           target="_blank" 
-           rel="noopener noreferrer"
-           title="Support this project"
-           class="floating-donate-btn">
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M19.5 5.25H4.5C3.25736 5.25 2.25 6.25736 2.25 7.5V16.5C2.25 17.7426 3.25736 18.75 4.5 18.75H19.5C20.7426 18.75 21.75 17.7426 21.75 16.5V7.5C21.75 6.25736 20.7426 5.25 19.5 5.25Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M15.75 15.75H18M15 12.75H18.75M11.25 18.75V5.25M6.75 9.75H8.25C9.49264 9.75 10.5 10.7574 10.5 12V12C10.5 13.2426 9.49264 14.25 8.25 14.25H6.75V9.75Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <span class="btn-text">Donate with PayPal</span>
-        </a>
-    </div> -->
 </body>
 </html>
