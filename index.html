@@ -3,25 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monopoly Cards Manager</title>
+    <title>Cards Collection Manager</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="js/cardsData.js"></script>
     <style>
         .gold-card {
             background-color: #fef3c7;
+        }
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 <body class="bg-gray-100 p-4">
     <div class="max-w-7xl mx-auto">
-        <h1 class="text-2xl font-bold text-center mb-4">Monopoly Cards Manager</h1>
+        <h1 class="text-2xl font-bold text-center mb-4">Cards Collection Manager</h1>
         
-        <div class="flex gap-4 justify-center mb-4">
+        <div class="flex gap-4 justify-center mb-2">
             <button id="saveButton" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Save</button>
             <button id="loadButton" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Load</button>
         </div>
+        <div class="flex flex-col items-center mb-4">
+            <div class="flex gap-4 justify-center">
+                <button id="exportDataBtn" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded">
+                    Transfer to another device
+                </button>
+                <button id="importDataBtn" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">
+                    Import from another device
+                </button>
+            </div>
+            <div class="text-xs text-gray-500 mt-1">
+                These buttons let you transfer all your data to another device or browser
+            </div>
+        </div>
         
-        <!-- Accounts configuration section -->
+        <!-- Accounts configuration -->
         <div class="bg-white p-4 rounded shadow mb-4">
             <h2 class="text-xl font-bold mb-2">Accounts Configuration</h2>
             <div id="accountsList" class="mb-2">
@@ -46,6 +61,22 @@
             <h2 class="text-xl font-bold mb-2">Statistics</h2>
             <div id="statistics" class="bg-white p-4 rounded shadow">
                 <!-- Statistics will be displayed here -->
+            </div>
+        </div>
+        
+        <!-- Filters -->
+        <div class="bg-white p-4 rounded shadow mb-4">
+            <h2 class="text-xl font-bold mb-2">Filters</h2>
+            <div class="flex flex-wrap gap-2">
+                <button id="filterAll" class="filter-btn px-3 py-1 rounded text-white bg-blue-500">
+                    All cards
+                </button>
+                <button id="filterExchangeable" class="filter-btn px-3 py-1 rounded text-white bg-gray-500">
+                    Possible exchanges
+                </button>
+                <button id="filterMissing" class="filter-btn px-3 py-1 rounded text-white bg-gray-500">
+                    Missing cards
+                </button>
             </div>
         </div>
         
@@ -75,25 +106,26 @@
         // Global variables
         let cards = [];
         let accounts = [];
+        let currentFilter = 'all'; // Possible values: 'all', 'exchangeable', 'missing'
         
         // Function to initialize storage with default values if needed
         function initializeStorage() {
-            if (!localStorage.getItem('monopolyAccounts')) {
+            if (!localStorage.getItem('cardsManagerAccounts')) {
                 // Default configuration: 2 accounts
                 const defaultAccounts = ["Account 1", "Account 2"];
-                localStorage.setItem('monopolyAccounts', JSON.stringify(defaultAccounts));
+                localStorage.setItem('cardsManagerAccounts', JSON.stringify(defaultAccounts));
             }
         }
 
         // Function to load accounts from local storage
         function loadAccounts() {
             initializeStorage();
-            return JSON.parse(localStorage.getItem('monopolyAccounts'));
+            return JSON.parse(localStorage.getItem('cardsManagerAccounts'));
         }
 
         // Function to save accounts to local storage
         function saveAccounts(accounts) {
-            localStorage.setItem('monopolyAccounts', JSON.stringify(accounts));
+            localStorage.setItem('cardsManagerAccounts', JSON.stringify(accounts));
         }
 
         // Function to add a new account
@@ -146,7 +178,7 @@
             accounts = loadAccounts();
             
             // Load saved data or initialize
-            const savedData = localStorage.getItem('monopolyData');
+            const savedData = localStorage.getItem('cardsManagerData');
             if (savedData) {
                 try {
                     const data = JSON.parse(savedData);
@@ -187,24 +219,24 @@
             addEventListeners();
         }
 
-        // Function to migrate old data (thib gros/petit) to the new format
+        // Function to migrate old data to the new format
         function migrateOldData() {
             // Check if we already have configured accounts
-            if (localStorage.getItem('monopolyAccounts')) {
+            if (localStorage.getItem('cardsManagerAccounts')) {
                 return; // Already migrated
             }
             
-            // Check if there's old data to migrate
-            const savedData = localStorage.getItem('monopolyData');
-            if (savedData) {
+            // Try to migrate from old format if it exists
+            if (localStorage.getItem('monopolyAccounts')) {
                 try {
-                    const data = JSON.parse(savedData);
+                    const oldAccounts = JSON.parse(localStorage.getItem('monopolyAccounts'));
+                    localStorage.setItem('cardsManagerAccounts', JSON.stringify(oldAccounts));
+                    console.log("Successfully migrated accounts from old format");
                     
-                    // If the data has the old format with "thib gros" and "thib petit"
-                    if (data.cards && data.cards.length > 0 && data.cards[0].quantities && data.cards[0].quantities.length === 2) {
-                        // Create accounts with the old names
-                        localStorage.setItem('monopolyAccounts', JSON.stringify(["thib gros", "thib petit"]));
-                        console.log("Successfully migrated old accounts");
+                    // Also migrate the card data if it exists
+                    if (localStorage.getItem('monopolyData')) {
+                        localStorage.setItem('cardsManagerData', localStorage.getItem('monopolyData'));
+                        console.log("Successfully migrated card data from old format");
                     }
                 } catch (e) {
                     console.error("Error during migration:", e);
@@ -233,6 +265,17 @@
 
         // Function to initialize default data
         function initializeDefaultData() {
+            // Make sure cardsData is defined
+            if (typeof cardsData === 'undefined') {
+                // Create sample data if cardsData is not available
+                cardsData = Array.from({ length: 36 }, (_, i) => ({
+                    id: i + 1,
+                    name: `Card ${i + 1}`,
+                    stars: (i % 3) + 1,
+                    isGold: i % 10 === 0
+                }));
+            }
+            
             cards = cardsData.map(card => {
                 // Create a quantity array with a zero per account
                 const quantities = new Array(accounts.length).fill(0);
@@ -305,9 +348,9 @@
                     <div class="text-sm font-medium mb-1">${account}</div>
                     <div class="flex gap-2">
                         <button class="copy-btn bg-blue-500 text-white px-2 py-1 rounded text-xs" 
-                                data-account-index="${index}">Copy</button>
+                                data-account-index="${index}">Copy quantities</button>
                         <button class="import-btn bg-green-500 text-white px-2 py-1 rounded text-xs" 
-                                data-account-index="${index}">Import</button>
+                                data-account-index="${index}">Import quantities</button>
                     </div>
                 `;
                 container.appendChild(div);
@@ -403,7 +446,7 @@
             }
         }
 
-        // Update card display to include set number
+        // Update card display to take into account a variable number of accounts
         function renderCards() {
             console.log("Rendering cards...", cards.length, "cards to display");
             
@@ -417,11 +460,30 @@
                 ${accounts.map(account => `<th class="py-2 px-3 text-center">${account}</th>`).join('')}
             `;
             
-            cards.forEach(card => {
+            // Filter cards based on the active filter
+            let filteredCards = [...cards]; // Default: all cards
+            
+            if (currentFilter === 'exchangeable') {
+                // Cards where at least one account has extra (>1) 
+                // and at least one other account needs it (=0)
+                filteredCards = cards.filter(card => {
+                    const hasExtraInSomeAccount = card.quantities.some(qty => qty > 1);
+                    const isMissingInSomeAccount = card.quantities.some(qty => qty === 0);
+                    return hasExtraInSomeAccount && isMissingInSomeAccount;
+                });
+            } else if (currentFilter === 'missing') {
+                // Cards missing in at least one account
+                filteredCards = cards.filter(card => {
+                    return card.quantities.some(qty => qty === 0);
+                });
+            }
+            
+            // Display the filtered cards
+            filteredCards.forEach(card => {
                 const tr = document.createElement('tr');
                 tr.className = `border-t hover:bg-gray-50 ${card.isGold ? 'gold-card' : ''}`;
                 
-                // Calculate set number (assuming 9 cards per set, starting from set 1)
+                // Calculate set number
                 const setNumber = Math.floor((card.id - 1) / 9) + 1;
                 
                 // Name cell with set number, name, and stars
@@ -478,8 +540,16 @@
                 tbody.appendChild(tr);
             });
             
-            // Update cards information
-            document.getElementById('cardsInfo').textContent = `Total cards: ${cards.length} (including ${cards.filter(c => c.isGold).length} GOLD cards)`;
+            // Update the number of cards displayed
+            const totalCards = cards.length;
+            const displayedCards = filteredCards.length;
+            
+            let infoText = `Total cards: ${totalCards} (including ${cards.filter(c => c.isGold).length} GOLD cards)`;
+            if (currentFilter !== 'all') {
+                infoText += ` | Displayed: ${displayedCards}`;
+            }
+            
+            document.getElementById('cardsInfo').textContent = infoText;
             
             // Add event listeners to inputs
             addQuantityInputListeners();
@@ -516,7 +586,7 @@
             renderCards();
         }
 
-        // Modified updateStatistics function for a variable number of accounts
+        // Updated function for statistics
         function updateStatistics() {
             const container = document.getElementById('statistics');
             container.innerHTML = '';
@@ -534,13 +604,57 @@
             // Display statistics for each account
             accounts.forEach((account, index) => {
                 const div = document.createElement('div');
-                div.className = 'text-center bg-white p-2 rounded shadow';
+                div.className = 'text-center bg-white p-3 rounded shadow';
+                
+                // Calculate cards with extra copies
+                const extraCards = cards.filter(card => card.quantities[index] > 1).length;
+                
+                // Calculate missing cards
+                const missingCards = cards.filter(card => card.quantities[index] === 0).length;
+                
+                // Calculate exchangeable cards (extra for this account AND missing for at least one other)
+                const exchangeableCards = cards.filter(card => {
+                    return card.quantities[index] > 1 && // This account has extras
+                           accounts.some((_, otherIndex) => otherIndex !== index && card.quantities[otherIndex] === 0); // Another account needs it
+                }).length;
+                
                 div.innerHTML = `
                     <div class="font-medium">${account}</div>
-                    <div class="text-xl font-bold">${uniqueCardsByAccount[index]}</div>
+                    <div class="text-xl font-bold">${uniqueCardsByAccount[index]}/${cards.length}</div>
+                    <div class="text-sm mt-1">
+                        <div class="flex justify-between">
+                            <span>Missing:</span>
+                            <span class="font-medium text-blue-600">${missingCards}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Duplicates:</span>
+                            <span class="font-medium text-green-600">${extraCards}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Exchangeable:</span>
+                            <span class="font-medium text-purple-600">${exchangeableCards}</span>
+                        </div>
+                    </div>
                 `;
                 flexContainer.appendChild(div);
             });
+            
+            // Add global statistics
+            const exchangeablePairs = cards.filter(card => {
+                const hasExtraInSomeAccount = card.quantities.some(qty => qty > 1);
+                const isMissingInSomeAccount = card.quantities.some(qty => qty === 0);
+                return hasExtraInSomeAccount && isMissingInSomeAccount;
+            }).length;
+            
+            const globalStats = document.createElement('div');
+            globalStats.className = 'w-full text-center mt-4';
+            globalStats.innerHTML = `
+                <div class="inline-block bg-indigo-100 p-2 rounded border border-indigo-200">
+                    <span class="font-medium">Possible exchanges:</span>
+                    <span class="font-bold text-indigo-600 ml-2">${exchangeablePairs} cards</span>
+                </div>
+            `;
+            container.appendChild(globalStats);
         }
 
         // Function to add a legend explaining exchange indicators
@@ -575,6 +689,26 @@
             infoDiv.parentNode.insertBefore(legendDiv, infoDiv.nextSibling);
         }
 
+        // Function to set the active filter
+        function setActiveFilter(filter) {
+            currentFilter = filter;
+            
+            // Update button appearance
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-500');
+                btn.classList.add('bg-gray-500');
+            });
+            
+            const activeButton = document.getElementById(`filter${filter.charAt(0).toUpperCase() + filter.slice(1)}`);
+            if (activeButton) {
+                activeButton.classList.remove('bg-gray-500');
+                activeButton.classList.add('bg-blue-500');
+            }
+            
+            // Update card display
+            renderCards();
+        }
+
         // Function to add all event listeners
         function addEventListeners() {
             // Existing buttons
@@ -604,6 +738,23 @@
                 }
             });
             
+            // Add listeners for filter buttons
+            document.getElementById('filterAll').addEventListener('click', function() {
+                setActiveFilter('all');
+            });
+            
+            document.getElementById('filterExchangeable').addEventListener('click', function() {
+                setActiveFilter('exchangeable');
+            });
+            
+            document.getElementById('filterMissing').addEventListener('click', function() {
+                setActiveFilter('missing');
+            });
+            
+            // Export/Import buttons
+            document.getElementById('exportDataBtn').addEventListener('click', showExportDialog);
+            document.getElementById('importDataBtn').addEventListener('click', showImportDialog);
+            
             // Add listeners for quantity inputs
             addQuantityInputListeners();
         }
@@ -615,13 +766,13 @@
                 lastUpdate: new Date().toISOString()
             };
             
-            localStorage.setItem('monopolyData', JSON.stringify(data));
+            localStorage.setItem('cardsManagerData', JSON.stringify(data));
             alert('Data successfully saved!');
         }
 
         // Function to load data
         function loadData() {
-            const savedData = localStorage.getItem('monopolyData');
+            const savedData = localStorage.getItem('cardsManagerData');
             if (savedData) {
                 try {
                     const data = JSON.parse(savedData);
@@ -644,8 +795,234 @@
             }
         }
 
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', init);
-    </script>
+        // Function to generate an export code for the data
+        function generateExportCode() {
+            try {
+                // Prepare the data
+                const dataToExport = {
+                    accounts: accounts,
+                    cards: cards,
+                    timestamp: new Date().toISOString()
+                };
+                
+                // Convert to JSON and encode to base64
+                const jsonData = JSON.stringify(dataToExport);
+                const base64Data = btoa(unescape(encodeURIComponent(jsonData)));
+                
+                return base64Data;
+            } catch (error) {
+                console.error('Error generating export code:', error);
+                return null;
+            }
+        }
+
+        // Function to import data from a code
+       function importFromCode(code) {
+        if (!code || code.trim() === '') {
+            alert('No code was provided.');
+            return false;
+        }
+        
+        try {
+            // Decode the base64 data and parse the JSON
+            const jsonData = decodeURIComponent(escape(atob(code.trim())));
+            const importedData = JSON.parse(jsonData);
+            
+            if (!importedData.accounts || !importedData.cards) {
+                alert('The import code is invalid or corrupted.');
+                return false;
+            }
+            
+            // Update local data
+            accounts = importedData.accounts;
+            cards = importedData.cards;
+            
+            // Save the data and update the interface
+            saveAccounts(accounts);
+            saveData();
+            renderAccounts();
+            renderAccountButtons();
+            renderCards();
+            updateStatistics();
+            
+            return true;
+        } catch (error) {
+            console.error('Error importing data:', error);
+            alert('The import code is invalid or corrupted.');
+            return false;
+        }
+    }
+
+    // Function to show the export dialog
+    function showExportDialog() {
+        const exportCode = generateExportCode();
+        
+        if (!exportCode) {
+            alert('An error occurred while generating the export code.');
+            return;
+        }
+        
+        // Create the overlay dialog
+        const overlay = document.createElement('div');
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        overlay.style.zIndex = '1000';
+        overlay.style.display = 'flex';
+        overlay.style.justifyContent = 'center';
+        overlay.style.alignItems = 'center';
+        
+        // Create the dialog box
+        const dialog = document.createElement('div');
+        dialog.style.backgroundColor = '#fff';
+        dialog.style.padding = '20px';
+        dialog.style.borderRadius = '8px';
+        dialog.style.maxWidth = '600px';
+        dialog.style.width = '90%';
+        dialog.style.maxHeight = '80vh';
+        dialog.style.overflowY = 'auto';
+        
+        // Dialog content
+        dialog.innerHTML = `
+            <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 15px;">Data Export Code</h2>
+            <p style="margin-bottom: 15px;">
+                Copy this code and save it. You can use it on another device 
+                to import your data.
+            </p>
+            <div style="position: relative; margin-bottom: 20px;">
+                <textarea id="exportCodeArea" 
+                    style="width: 100%; height: 100px; padding: 10px; border: 1px solid #ccc; 
+                           border-radius: 4px; font-family: monospace; font-size: 12px;"
+                    readonly>${exportCode}</textarea>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <button id="copyCodeBtn" 
+                    style="padding: 8px 16px; background-color: #3b82f6; color: white; 
+                           border: none; border-radius: 4px; cursor: pointer;">
+                    Copy code
+                </button>
+                <button id="closeDialogBtn" 
+                    style="padding: 8px 16px; background-color: #6b7280; color: white; 
+                           border: none; border-radius: 4px; cursor: pointer;">
+                    Close
+                </button>
+            </div>
+        `;
+        
+        // Add the dialog to the overlay, then to the page
+        overlay.appendChild(dialog);
+        document.body.appendChild(overlay);
+        
+        // Add event listeners for the buttons
+        document.getElementById('copyCodeBtn').addEventListener('click', function() {
+            const textarea = document.getElementById('exportCodeArea');
+            textarea.select();
+            document.execCommand('copy');
+            this.textContent = 'Copied!';
+            this.style.backgroundColor = '#10b981';
+            setTimeout(() => {
+                this.textContent = 'Copy code';
+                this.style.backgroundColor = '#3b82f6';
+            }, 2000);
+        });
+        
+        document.getElementById('closeDialogBtn').addEventListener('click', function() {
+            document.body.removeChild(overlay);
+        });
+        
+        // Automatically select the code text
+        const textarea = document.getElementById('exportCodeArea');
+        textarea.focus();
+        textarea.select();
+    }
+
+    // Function to show the import dialog
+    function showImportDialog() {
+        // Create the overlay dialog
+        const overlay = document.createElement('div');
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        overlay.style.zIndex = '1000';
+        overlay.style.display = 'flex';
+        overlay.style.justifyContent = 'center';
+        overlay.style.alignItems = 'center';
+        
+        // Create the dialog box
+        const dialog = document.createElement('div');
+        dialog.style.backgroundColor = '#fff';
+        dialog.style.padding = '20px';
+        dialog.style.borderRadius = '8px';
+        dialog.style.maxWidth = '600px';
+        dialog.style.width = '90%';
+        
+        // Dialog content
+        dialog.innerHTML = `
+            <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 15px;">Import Data</h2>
+            <p style="margin-bottom: 15px;">
+                Paste the export code that you previously generated on another device.
+            </p>
+            <div style="margin-bottom: 20px;">
+                <textarea id="importCodeArea" 
+                    style="width: 100%; height: 100px; padding: 10px; border: 1px solid #ccc; 
+                           border-radius: 4px; font-family: monospace; font-size: 12px;"
+                    placeholder="Paste your import code here..."></textarea>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <button id="importBtn" 
+                    style="padding: 8px 16px; background-color: #10b981; color: white; 
+                           border: none; border-radius: 4px; cursor: pointer;">
+                    Import
+                </button>
+                <button id="cancelImportBtn" 
+                    style="padding: 8px 16px; background-color: #6b7280; color: white; 
+                           border: none; border-radius: 4px; cursor: pointer;">
+                    Cancel
+                </button>
+            </div>
+        `;
+        
+        // Add the dialog to the overlay, then to the page
+        overlay.appendChild(dialog);
+        document.body.appendChild(overlay);
+        
+        // Add event listeners for the buttons
+        document.getElementById('importBtn').addEventListener('click', function() {
+            const code = document.getElementById('importCodeArea').value;
+            if (code.trim() === '') {
+                alert('Please paste a valid import code.');
+                return;
+            }
+            
+            // Confirm before import
+            if (confirm('This action will replace all your current data. Are you sure you want to continue?')) {
+                const success = importFromCode(code);
+                if (success) {
+                    alert('Data imported successfully!');
+                    document.body.removeChild(overlay);
+                }
+            }
+        });
+        
+        document.getElementById('cancelImportBtn').addEventListener('click', function() {
+            document.body.removeChild(overlay);
+        });
+        
+        // Focus on the text area
+        document.getElementById('importCodeArea').focus();
+    }
+
+    // Initialize when the page loads
+    document.addEventListener('DOMContentLoaded', init);
+</script>
+
+<!-- Cards data script (to include or reference) -->
+<script src="js/cardsData.js"></script>
 </body>
 </html>
