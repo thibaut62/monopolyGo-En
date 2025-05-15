@@ -372,7 +372,7 @@
             });
         }
 
-        // Function to copy account quantities - format one line per value
+        // Remplacez la fonction copyAccount par celle-ci
         function copyAccount(accountIndex) {
             // Start with "Quantity" to indicate the format
             let quantitiesText = "Quantity\n";
@@ -382,68 +382,181 @@
                 quantitiesText += card.quantities[accountIndex] + "\n";
             });
             
-            navigator.clipboard.writeText(quantitiesText)
-                .then(() => {
-                    alert(`${accounts[accountIndex]} data copied to clipboard.`);
-                })
-                .catch(err => {
-                    console.error('Error copying data:', err);
-                    alert('Error copying data.');
-                });
-        }
-
-        // Function to import account quantities - format one line per value
-        function importAccount(accountIndex) {
-            const input = prompt(`Paste the data to import for ${accounts[accountIndex]}`);
-            if (!input || input.trim() === "") {
-                alert("No data provided.");
-                return;
-            }
+            // Create a temporary textarea element for copying
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = quantitiesText;
+            tempTextArea.setAttribute('readonly', '');
+            tempTextArea.style.position = 'absolute';
+            tempTextArea.style.left = '-9999px';
+            document.body.appendChild(tempTextArea);
+            
+            // Select and copy the text
+            tempTextArea.select();
+            let success = false;
             
             try {
-                // Split the input by line breaks
-                let lines = input.split(/\r?\n/);
+                // First try with document.execCommand (works on all browsers)
+                success = document.execCommand('copy');
                 
-                // Remove the word "Quantity" if present in the first line
-                if (lines.length > 0 && lines[0].trim().toLowerCase() === "quantity") {
-                    lines = lines.slice(1);
+                // If that fails, try with the Clipboard API
+                if (!success) {
+                    navigator.clipboard.writeText(quantitiesText)
+                        .then(() => {
+                            success = true;
+                            alert(`${accounts[accountIndex]} data copied to clipboard.`);
+                        })
+                        .catch(err => {
+                            console.error('Error copying data:', err);
+                            alert('Error copying data. Try selecting the text manually.');
+                        });
+                } else {
+                    alert(`${accounts[accountIndex]} data copied to clipboard.`);
                 }
-                
-                // Filter empty lines and convert to numbers
-                const quantities = lines
-                    .map(line => line.trim())
-                    .filter(line => line !== "")
-                    .map(line => parseInt(line, 10))
-                    .filter(num => !isNaN(num));
-                
-                console.log("Detected quantities:", quantities);
-                
-                if (quantities.length === 0) {
-                    alert("No valid quantities found.");
+            } catch (err) {
+                console.error('Error copying data:', err);
+                alert('Error copying data. Try selecting the text manually.');
+            }
+            
+            // Clean up
+            document.body.removeChild(tempTextArea);
+        }
+
+        // to better handle pasted data
+        function importAccount(accountIndex) {
+            // Create a textarea element for pasting
+            const pasteArea = document.createElement('textarea');
+            pasteArea.style.width = '100%';
+            pasteArea.style.height = '100px';
+            pasteArea.style.padding = '10px';
+            pasteArea.style.border = '1px solid #ccc';
+            pasteArea.style.borderRadius = '4px';
+            pasteArea.style.fontFamily = 'monospace';
+            pasteArea.style.fontSize = '12px';
+            pasteArea.placeholder = "Paste your import data here...";
+            
+            // Create a modal dialog for pasting
+            const overlay = document.createElement('div');
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+            overlay.style.zIndex = '1000';
+            overlay.style.display = 'flex';
+            overlay.style.justifyContent = 'center';
+            overlay.style.alignItems = 'center';
+            
+            const dialog = document.createElement('div');
+            dialog.style.backgroundColor = '#fff';
+            dialog.style.padding = '20px';
+            dialog.style.borderRadius = '8px';
+            dialog.style.maxWidth = '600px';
+            dialog.style.width = '90%';
+            
+            dialog.innerHTML = `
+                <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 15px;">
+                    Import data for ${accounts[accountIndex]}
+                </h2>
+                <p style="margin-bottom: 15px;">
+                    Paste the data to import in the box below.
+                </p>
+            `;
+            
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style.display = 'flex';
+            buttonContainer.style.justifyContent = 'space-between';
+            buttonContainer.style.marginTop = '20px';
+            
+            const importBtn = document.createElement('button');
+            importBtn.textContent = 'Import';
+            importBtn.style.padding = '8px 16px';
+            importBtn.style.backgroundColor = '#10b981';
+            importBtn.style.color = 'white';
+            importBtn.style.border = 'none';
+            importBtn.style.borderRadius = '4px';
+            importBtn.style.cursor = 'pointer';
+            
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = 'Cancel';
+            cancelBtn.style.padding = '8px 16px';
+            cancelBtn.style.backgroundColor = '#6b7280';
+            cancelBtn.style.color = 'white';
+            cancelBtn.style.border = 'none';
+            cancelBtn.style.borderRadius = '4px';
+            cancelBtn.style.cursor = 'pointer';
+            
+            buttonContainer.appendChild(importBtn);
+            buttonContainer.appendChild(cancelBtn);
+            
+            dialog.appendChild(pasteArea);
+            dialog.appendChild(buttonContainer);
+            overlay.appendChild(dialog);
+            document.body.appendChild(overlay);
+            
+            // Focus on the textarea to make pasting easier
+            pasteArea.focus();
+            
+            // Add event listeners
+            importBtn.addEventListener('click', function() {
+                const input = pasteArea.value;
+                if (!input || input.trim() === "") {
+                    alert("No data provided.");
                     return;
                 }
                 
-                let importCount = 0;
-                
-                // Process each quantity and assign to the corresponding card
-                for (let i = 0; i < Math.min(quantities.length, cards.length); i++) {
-                    cards[i].quantities[accountIndex] = quantities[i];
-                    importCount++;
+                try {
+                    // Split the input by line breaks
+                    let lines = input.split(/\r?\n/);
+                    
+                    // Remove the word "Quantity" if present in the first line
+                    if (lines.length > 0 && lines[0].trim().toLowerCase() === "quantity") {
+                        lines = lines.slice(1);
+                    }
+                    
+                    // Filter empty lines and convert to numbers
+                    const quantities = lines
+                        .map(line => line.trim())
+                        .filter(line => line !== "")
+                        .map(line => parseInt(line, 10))
+                        .filter(num => !isNaN(num));
+                    
+                    console.log("Detected quantities:", quantities);
+                    
+                    if (quantities.length === 0) {
+                        alert("No valid quantities found.");
+                        return;
+                    }
+                    
+                    let importCount = 0;
+                    
+                    // Confirm before import
+                    if (confirm('This action will replace the current data for this account. Are you sure you want to continue?')) {
+                        // Process each quantity and assign to the corresponding card
+                        for (let i = 0; i < Math.min(quantities.length, cards.length); i++) {
+                            cards[i].quantities[accountIndex] = quantities[i];
+                            importCount++;
+                        }
+                        
+                        if (importCount > 0) {
+                            alert(`Import successful: ${importCount} cards updated for ${accounts[accountIndex]}.`);
+                            renderCards();
+                            updateStatistics();
+                            saveData(); // Save the changes
+                            document.body.removeChild(overlay);
+                        } else {
+                            alert("No cards could be imported.");
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error during import:', e);
+                    alert('Error during import: ' + e.message);
                 }
-                
-                if (importCount > 0) {
-                    alert(`Import successful: ${importCount} cards updated for ${accounts[accountIndex]}.`);
-                    renderCards();
-                    updateStatistics();
-                    saveData(); // Save the changes
-                } else {
-                    alert("No cards could be imported.");
-                }
-                
-            } catch (e) {
-                console.error('Error during import:', e);
-                alert('Error during import: ' + e.message);
-            }
+            });
+            
+            cancelBtn.addEventListener('click', function() {
+                document.body.removeChild(overlay);
+            });
         }
 
         // Update card display to take into account a variable number of accounts
