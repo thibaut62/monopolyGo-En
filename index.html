@@ -38,16 +38,25 @@
         
         <!-- Accounts configuration -->
         <div class="bg-white p-4 rounded shadow mb-4">
-            <h2 class="text-xl font-bold mb-2">Accounts Configuration</h2>
-            <div id="accountsList" class="mb-2">
-                <!-- Accounts will be displayed here -->
-            </div>
-            <div class="flex gap-2">
-                <input type="text" id="newAccountName" placeholder="New account name" 
-                       class="border rounded px-2 py-1 flex-grow">
-                <button id="addAccountBtn" class="bg-blue-500 text-white px-3 py-1 rounded">
-                    Add Account
+            <div class="flex justify-between items-center cursor-pointer" onclick="toggleSection('accountsSection')">
+                <h2 class="text-xl font-bold">Accounts Configuration</h2>
+                <button class="text-gray-500 hover:text-gray-700 focus:outline-none" id="accountsSectionToggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
                 </button>
+            </div>
+            <div id="accountsSection" class="mt-2">
+                <div id="accountsList" class="mb-2">
+                    <!-- Accounts will be displayed here -->
+                </div>
+                <div class="flex gap-2">
+                    <input type="text" id="newAccountName" placeholder="New account name" 
+                           class="border rounded px-2 py-1 flex-grow">
+                    <button id="addAccountBtn" class="bg-blue-500 text-white px-3 py-1 rounded">
+                        Add Account
+                    </button>
+                </div>
             </div>
         </div>
         
@@ -58,9 +67,20 @@
         
         <!-- Statistics -->
         <div class="mb-4">
-            <h2 class="text-xl font-bold mb-2">Statistics</h2>
-            <div id="statistics" class="bg-white p-4 rounded shadow">
-                <!-- Statistics will be displayed here -->
+            <div class="bg-white p-4 rounded shadow">
+                <div class="flex justify-between items-center cursor-pointer" onclick="toggleSection('statisticsSection')">
+                    <h2 class="text-xl font-bold">Statistics</h2>
+                    <button class="text-gray-500 hover:text-gray-700 focus:outline-none" id="statisticsSectionToggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                </div>
+                <div id="statisticsSection" class="mt-2">
+                    <div id="statistics">
+                        <!-- Statistics will be displayed here -->
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -1357,6 +1377,39 @@ function addStarFilterListeners() {
         setActiveFilter('gold');
     });
 }
+
+    // Function to toggle a section
+    function toggleSection(sectionId) {
+        const section = document.getElementById(sectionId);
+        const toggle = document.getElementById(sectionId + 'Toggle');
+        
+        if (section.style.display === 'none') {
+            // Expand section
+            section.style.display = 'block';
+            toggle.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+        } else {
+            // Collapse section
+            section.style.display = 'none';
+            toggle.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 15 12 9 18 15"></polyline></svg>';
+        }
+        
+        // Save state in local storage
+        localStorage.setItem(sectionId + 'State', section.style.display === 'none' ? 'collapsed' : 'expanded');
+    }
+    
+    // Function to restore section states on page load
+    function restoreSectionStates() {
+        const sections = ['accountsSection', 'statisticsSection'];
+        
+        sections.forEach(sectionId => {
+            const savedState = localStorage.getItem(sectionId + 'State');
+            if (savedState === 'collapsed') {
+                // Simulate a click to collapse the section
+                toggleSection(sectionId);
+                restoreSectionStates();
+            }
+        });
+    }
 
     // Initialize when the page loads
     document.addEventListener('DOMContentLoaded', init);
