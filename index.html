@@ -66,19 +66,49 @@
         
         <!-- Filters -->
         <div class="bg-white p-4 rounded shadow mb-4">
-            <h2 class="text-xl font-bold mb-2">Filters</h2>
-            <div class="flex flex-wrap gap-2">
-                <button id="filterAll" class="filter-btn px-3 py-1 rounded text-white bg-blue-500">
-                    All cards
-                </button>
-                <button id="filterExchangeable" class="filter-btn px-3 py-1 rounded text-white bg-gray-500">
-                    Possible exchanges
-                </button>
-                <button id="filterMissing" class="filter-btn px-3 py-1 rounded text-white bg-gray-500">
-                    Missing cards
-                </button>
-            </div>
+    <h2 class="text-xl font-bold mb-2">Filters</h2>
+    
+    <!-- Primary filters group -->
+    <div class="flex flex-wrap gap-2 mb-3">
+        <button id="filterAll" class="filter-btn px-3 py-1 rounded text-white bg-blue-500">
+            All cards
+        </button>
+        <button id="filterExchangeable" class="filter-btn px-3 py-1 rounded text-white bg-gray-500">
+            Possible exchanges
+        </button>
+        <button id="filterMissing" class="filter-btn px-3 py-1 rounded text-white bg-gray-500">
+            Missing cards
+        </button>
+        <button id="filterGold" class="filter-btn px-3 py-1 rounded text-white bg-gray-500">
+            GOLD cards
+        </button>
+    </div>
+    
+    <!-- Star filters -->
+    <div class="mt-2">
+        <div class="text-sm font-medium mb-2">Filter by rarity (stars):</div>
+        <div class="flex flex-wrap gap-2">
+            <button id="filterStarsAll" class="star-filter-btn px-3 py-1 rounded text-white bg-blue-500">
+                All
+            </button>
+            <button id="filterStars1" class="star-filter-btn px-3 py-1 rounded text-white bg-gray-500">
+                ⭐
+            </button>
+            <button id="filterStars2" class="star-filter-btn px-3 py-1 rounded text-white bg-gray-500">
+                ⭐⭐
+            </button>
+            <button id="filterStars3" class="star-filter-btn px-3 py-1 rounded text-white bg-gray-500">
+                ⭐⭐⭐
+            </button>
+            <button id="filterStars4" class="star-filter-btn px-3 py-1 rounded text-white bg-gray-500">
+                ⭐⭐⭐⭐
+            </button>
+            <button id="filterStars5" class="star-filter-btn px-3 py-1 rounded text-white bg-gray-500">
+                ⭐⭐⭐⭐⭐
+            </button>
         </div>
+    </div>
+</div>
         
         <!-- Cards information -->
         <div class="mb-2">
@@ -1131,11 +1161,262 @@
         document.getElementById('importCodeArea').focus();
     }
 
+    // Variables for filters
+//let currentFilter = 'all'; // Types: 'all', 'exchangeable', 'missing', 'gold'
+let currentStarsFilter = 'all'; // Types: 'all', 1, 2, 3, 4, 5
+
+// Function to update the existing renderCards function
+// This part should replace your current renderCards function or be integrated into it
+function renderCards() {
+    console.log("Rendering cards...", cards.length, "cards to display");
+    
+    const tbody = document.getElementById('cardsTable');
+    tbody.innerHTML = '';
+    
+    // Update the table header to display all accounts
+    const thead = document.querySelector('thead tr');
+    thead.innerHTML = `
+        <th class="py-2 px-3 text-left">Name</th>
+        ${accounts.map(account => `<th class="py-2 px-3 text-center">${account}</th>`).join('')}
+    `;
+    
+    // Filter cards based on active filters
+    let filteredCards = [...cards]; // Default: all cards
+    
+    // Apply main filter
+    if (currentFilter === 'exchangeable') {
+        // Cards where at least one account has extra (>1) 
+        // and at least one other account needs it (=0)
+        filteredCards = filteredCards.filter(card => {
+            const hasExtraInSomeAccount = card.quantities.some(qty => qty > 1);
+            const isMissingInSomeAccount = card.quantities.some(qty => qty === 0);
+            return hasExtraInSomeAccount && isMissingInSomeAccount;
+        });
+    } else if (currentFilter === 'missing') {
+        // Cards missing in at least one account
+        filteredCards = filteredCards.filter(card => {
+            return card.quantities.some(qty => qty === 0);
+        });
+    } else if (currentFilter === 'gold') {
+        // Only GOLD cards
+        filteredCards = filteredCards.filter(card => card.isGold);
+    }
+    
+    // Apply star filter
+    if (currentStarsFilter !== 'all') {
+        const starsCount = parseInt(currentStarsFilter);
+        filteredCards = filteredCards.filter(card => card.stars === starsCount);
+    }
+    
+    // Display the filtered cards
+    filteredCards.forEach(card => {
+        const tr = document.createElement('tr');
+        tr.className = `border-t hover:bg-gray-50 ${card.isGold ? 'gold-card' : ''}`;
+        
+        // Calculate set number
+        const setNumber = Math.floor((card.id - 1) / 9) + 1;
+        
+        // Name cell with set number, name, and stars
+        let html = `
+            <td class="py-2 px-3">
+                <span class="inline-block bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs font-bold mr-2">Set ${setNumber}</span>
+                ${card.name} 
+                ${card.isGold ? 
+                    '<span class="inline-block bg-yellow-200 text-yellow-800 px-2 py-1 rounded text-xs font-bold mx-1">GOLD</span>' : 
+                    ''
+                }
+                <span class="text-yellow-500">${'⭐'.repeat(card.stars)}</span>
+            </td>
+        `;
+        
+        // Add a cell for each account
+        accounts.forEach((_, accountIndex) => {
+            // Check for exchange possibilities
+            let accountClass = '';
+            let exchangeIndicator = '';
+            
+            // Detect exchange possibilities
+            const hasExtra = card.quantities[accountIndex] > 1;
+            
+            // Check if other accounts need this card
+            const otherAccountsNeed = accounts.some((_, otherIndex) => 
+                otherIndex !== accountIndex && card.quantities[otherIndex] === 0
+            );
+            
+            if (hasExtra && otherAccountsNeed) {
+                accountClass = 'bg-green-100 border-green-300 border';
+                exchangeIndicator = '<span class="inline-block ml-1 text-green-600 text-xs">⟷</span>';
+            }
+            
+            const needsCard = card.quantities[accountIndex] === 0;
+            const otherAccountsHaveExtra = accounts.some((_, otherIndex) => 
+                otherIndex !== accountIndex && card.quantities[otherIndex] > 1
+            );
+            
+            if (needsCard && otherAccountsHaveExtra) {
+                accountClass = 'bg-blue-100 border-blue-300 border';
+            }
+            
+            html += `
+                <td class="py-2 px-3 text-center ${accountClass}">
+                    <input type="number" min="0" class="quantity-input w-12 text-center border rounded" 
+                        data-card-id="${card.id}" data-account-index="${accountIndex}" value="${card.quantities[accountIndex]}">
+                    ${exchangeIndicator}
+                </td>
+            `;
+        });
+        
+        tr.innerHTML = html;
+        tbody.appendChild(tr);
+    });
+    
+    // Update the number of cards displayed
+    const totalCards = cards.length;
+    const displayedCards = filteredCards.length;
+    
+    let infoText = `Total cards: ${totalCards} (including ${cards.filter(c => c.isGold).length} GOLD cards)`;
+    if (currentFilter !== 'all' || currentStarsFilter !== 'all') {
+        infoText += ` | Displayed: ${displayedCards}`;
+    }
+    
+    document.getElementById('cardsInfo').textContent = infoText;
+    
+    // Add event listeners to inputs
+    addQuantityInputListeners();
+}
+
+// Function to set the active main filter
+function setActiveFilter(filter) {
+    currentFilter = filter;
+    
+    // Update button appearance
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('bg-blue-500');
+        btn.classList.add('bg-gray-500');
+    });
+    
+    const activeButton = document.getElementById(`filter${filter.charAt(0).toUpperCase() + filter.slice(1)}`);
+    if (activeButton) {
+        activeButton.classList.remove('bg-gray-500');
+        activeButton.classList.add('bg-blue-500');
+    }
+    
+    // Update card display
+    renderCards();
+}
+
+// Function to set the active stars filter
+function setActiveStarsFilter(stars) {
+    currentStarsFilter = stars;
+    
+    // Update button appearance
+    document.querySelectorAll('.star-filter-btn').forEach(btn => {
+        btn.classList.remove('bg-blue-500');
+        btn.classList.add('bg-gray-500');
+    });
+    
+    const activeButton = document.getElementById(`filterStars${stars === 'all' ? 'All' : stars}`);
+    if (activeButton) {
+        activeButton.classList.remove('bg-gray-500');
+        activeButton.classList.add('bg-blue-500');
+    }
+    
+    // Update card display
+    renderCards();
+}
+
+// Add this function to your existing addEventListeners function or call it on load
+function addStarFilterListeners() {
+    // Add listeners for star filter buttons
+    document.getElementById('filterStarsAll').addEventListener('click', function() {
+        setActiveStarsFilter('all');
+    });
+    
+    document.getElementById('filterStars1').addEventListener('click', function() {
+        setActiveStarsFilter(1);
+    });
+    
+    document.getElementById('filterStars2').addEventListener('click', function() {
+        setActiveStarsFilter(2);
+    });
+    
+    document.getElementById('filterStars3').addEventListener('click', function() {
+        setActiveStarsFilter(3);
+    });
+    
+    document.getElementById('filterStars4').addEventListener('click', function() {
+        setActiveStarsFilter(4);
+    });
+    
+    document.getElementById('filterStars5').addEventListener('click', function() {
+        setActiveStarsFilter(5);
+    });
+    
+    // Add listener for Gold filter
+    document.getElementById('filterGold').addEventListener('click', function() {
+        setActiveFilter('gold');
+    });
+}
+
     // Initialize when the page loads
     document.addEventListener('DOMContentLoaded', init);
+        addStarFilterListeners();
 </script>
 
 <!-- Cards data script (to include or reference) -->
 <script src="js/cardsData.js"></script>
+
+<!-- PayPal floating button with English text -->
+<div id="paypal-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 999; display: flex; flex-direction: column; align-items: center;">
+    <div id="paypal-text" style="background-color: #0070ba; color: white; padding: 5px 10px; border-radius: 4px; margin-bottom: 8px; font-size: 14px; opacity: 0; transform: translateY(10px); transition: all 0.3s ease; pointer-events: none; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+        Support
+    </div>
+    <a href="https://www.paypal.me/delvillethibaut/" target="_blank" rel="noopener noreferrer" title="Donate to support development" 
+       style="display: flex; align-items: center; justify-content: center; background-color: #0070ba; color: white; width: 48px; height: 48px; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2); text-decoration: none; font-size: 20px; font-weight: bold; opacity: 0.7; transition: all 0.3s ease; cursor: pointer;" 
+       id="paypal-button" onmouseenter="showPayPalText()" onmouseleave="hidePayPalText()" onmousedown="pressPayPalButton()" onmouseup="releasePayPalButton()">
+        <svg width="25" height="25" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7.02 5.5H14.38C15.87 5.5 17.18 6.31 17.72 7.61C18.1 8.59 18.03 9.74 17.5 10.67C16.96 11.59 16.04 12.22 14.98 12.4C15.27 12.52 15.54 12.67 15.77 12.87C16.17 13.22 16.46 13.68 16.59 14.25C16.74 14.84 16.7 15.5 16.47 16.11C16.2 16.86 15.66 17.46 14.96 17.85C14.23 18.25 13.35 18.41 12.47 18.32C11.55 18.29 10.73 17.98 10.06 17.48C9.36 16.96 8.86 16.21 8.65 15.36C8.44 14.49 8.53 13.51 8.96 12.71H7.5C5.8 12.71 4.5 11.43 4.5 9.75C4.5 7.5 5.55 5.5 7.02 5.5Z" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M19.5 9.5V16.75C19.5 18.13 18.38 19.25 17 19.25H9" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+    </a>
+</div>
+
+<!-- Script for PayPal button interactions -->
+<script>
+function showPayPalText() {
+    document.getElementById('paypal-button').style.opacity = '1';
+    document.getElementById('paypal-button').style.transform = 'scale(1.1)';
+    document.getElementById('paypal-text').style.opacity = '1';
+    document.getElementById('paypal-text').style.transform = 'translateY(0)';
+}
+
+function hidePayPalText() {
+    document.getElementById('paypal-button').style.opacity = '0.7';
+    document.getElementById('paypal-button').style.transform = 'scale(1)';
+    document.getElementById('paypal-text').style.opacity = '0';
+    document.getElementById('paypal-text').style.transform = 'translateY(10px)';
+}
+
+function pressPayPalButton() {
+    document.getElementById('paypal-button').style.transform = 'scale(0.95)';
+}
+
+function releasePayPalButton() {
+    document.getElementById('paypal-button').style.transform = 'scale(1.1)';
+}
+
+// Handle opacity during scrolling
+window.addEventListener('scroll', function() {
+    // Reduce opacity during scrolling to be even more discreet
+    document.getElementById('paypal-container').style.opacity = '0.5';
+    
+    // Restore opacity after scrolling
+    clearTimeout(window.scrollTimeout);
+    window.scrollTimeout = setTimeout(function() {
+        document.getElementById('paypal-container').style.opacity = '1';
+    }, 800);
+});
+</script>
+
 </body>
 </html>
