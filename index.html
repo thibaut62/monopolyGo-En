@@ -126,6 +126,9 @@
             <button id="filterStars5" class="star-filter-btn px-3 py-1 rounded text-white bg-gray-500">
                 ⭐⭐⭐⭐⭐
             </button>
+                        <button id="filterStars6" class="star-filter-btn px-3 py-1 rounded text-white bg-gray-500">
+                ⭐⭐⭐⭐⭐⭐
+            </button>
         </div>
     </div>
 </div>
@@ -1370,6 +1373,10 @@ function addStarFilterListeners() {
     
     document.getElementById('filterStars5').addEventListener('click', function() {
         setActiveStarsFilter(5);
+    });
+
+        document.getElementById('filterStars6').addEventListener('click', function() {
+        setActiveStarsFilter(6);
     });
     
     // Add listener for Gold filter
